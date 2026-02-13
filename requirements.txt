@@ -1,0 +1,6 @@
+# Dépendances du projet Matchstick Game
+# tkinter est inclus dans la bibliothèque standard Python 3.x
+# Aucune dépendance externe requise pour la Partie 1 et 2
+
+# Pour la vérification du style de code
+pylint>=3.0.0
