@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# Projet_IA
-mettre en œuvre de l’apprentissage par renforcement à travers trois exemples de jeux accompagnés d’une interface graphique simple via la librairie Tkinter.
-=======
 # 🎮 Matchstick Game — Jeu des Allumettes
 
 Jeu des allumettes développé en Python avec interface graphique Tkinter, dans le cadre du cours **IN252 - Projet de conception IA** (HENaLLux).
@@ -37,32 +33,58 @@ matchstick_game/
 ## ⚙️ Installation
 
 ### Prérequis
-- Python 3.8 ou supérieur
-- `tkinter` (inclus dans la bibliothèque standard Python)
+- Python 3.8 ou supérieur → https://www.python.org/downloads/
+- `tkinter` est inclus automatiquement avec Python
 
-### Étapes
+---
+
+### Étape 1 — Télécharger le projet
+
+1. Aller sur **https://github.com/VVZ-Data/Projet_IA**
+2. Cliquer sur le bouton vert **"Code"**
+3. Cliquer sur **"Download ZIP"**
+4. **Extraire** le fichier ZIP téléchargé dans le dossier de votre choix
+
+---
+
+### Étape 2 — Ouvrir un terminal dans le dossier extrait
+
+- **Windows** : ouvrir le dossier extrait → cliquer dans la barre d'adresse de l'explorateur → taper `cmd` → Entrée
+- **ou** : clic droit dans le dossier → *"Ouvrir dans le terminal"*
+
+---
+
+### Étape 3 — Créer l'environnement virtuel
 
 ```bash
-# 1. Cloner le dépôt
-git clone https://github.com/VOTRE_USERNAME/matchstick-game.git
-cd matchstick-game
-
-# 2. Créer et activer un environnement virtuel
 python -m venv env
+```
 
+---
+
+### Étape 4 — Activer l'environnement virtuel
+
+```bash
 # Windows
 env\Scripts\activate
 
 # Unix / macOS
 source env/bin/activate
+```
 
-# 3. Installer les dépendances
+> Vous devriez voir `(env)` apparaître au début de votre ligne de commande.
+
+---
+
+### Étape 5 — Installer les dépendances
+
+```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-## ▶️ Lancement
+### Étape 6 — Lancer le jeu
 
 ```bash
 python main.py
@@ -72,7 +94,7 @@ python main.py
 
 ## 🎲 Règles du jeu
 
-1. La partie commence avec 15 allumettes (modifiable dans `main.py`).
+1. La partie commence avec 15 allumettes.
 2. Les joueurs sont mélangés aléatoirement au début de chaque partie.
 3. À son tour, un joueur clique sur **Take 1**, **Take 2** ou **Take 3**.
 4. Le joueur qui prend la **dernière allumette perd**.
@@ -84,33 +106,20 @@ python main.py
 
 Le code respecte :
 - **PEP 8** (style Python standard)
-- **Clean Code** : fonctions courtes (< 20 lignes), noms explicites
+- **Clean Code** : fonctions courtes, noms explicites
 - **Type Hinting** sur toutes les fonctions
 - **Docstrings** complètes sur toutes les classes et méthodes
 - **Architecture MVC** stricte
-
-Vérification avec Pylint :
-```bash
-pylint player.py game_model.py game_view.py game_controller.py main.py
-```
-
----
-
-## 🤖 IA Générative
-
-Certaines docstrings ou portions de code ont pu être assistées par IA.
-Conformément aux consignes, ces éléments sont marqués `[IA-NOM]` en première ligne de leur spécification.
 
 ---
 
 ## 👥 Auteurs
 
-- **[Prénom Nom 1]**
-- **[Prénom Nom 2]**
+- **[Victor Van Zieleghem]**
+- **[Ethan Nickels]**
 
 ---
 
 ## 📄 Licence
 
 Projet académique — HENaLLux 2025-2026
->>>>>>> 36c9428 (feat: initialisation du projet)
