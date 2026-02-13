@@ -38,15 +38,17 @@ class Player:
         """
         return self.nb_wins + self.nb_loses
 
-    @staticmethod
-    def play() -> int:
+    def play(self) -> int:
         """
-        Choisit aléatoirement un nombre d'allumettes entre 1 et 3.
+        Choisit aléatoirement un nombre d'allumettes entre 1 et le maximum possible.
+        Le maximum est min(3, nb_allumettes_restantes) pour ne pas dépasser ce qui est disponible.
 
         Returns:
-            int: Un entier aléatoire entre 1 et 3 inclus.
+            int: Un entier aléatoire entre 1 et min(3, nb restant) inclus.
         """
-        return random.randint(1, 3)
+        # Limiter le choix au nombre d'allumettes restantes
+        max_take = min(3, self.game.nb) if self.game else 3
+        return random.randint(1, max_take)
 
     def win(self) -> None:
         """
