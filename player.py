@@ -1,7 +1,8 @@
 """
-Module contenant les classes Player et Human pour le jeu des allumettes.
+Module contenant les classes Player, Human et AI pour le jeu des allumettes.
 """
 import random
+import game_model
 
 
 class Player:
@@ -99,3 +100,79 @@ class Human(Player):
                 print("Please enter 1, 2 or 3.")
             except ValueError:
                 print("Invalid input. Please enter a number.")
+
+class AI(Player):
+
+    def __init__(self, name, game=None):
+        super().__init__(name, game)
+        self.epsilon = 0.9
+        self.learning_rate = 0.01
+        self.history = []
+        self.previous_state = None
+        self.value_function = {}
+
+        #crée tout les états finaux possible
+        for remaining in range(1, game.nb + 1): #création de paire inutile peut-etre reduire à max 3
+            state_final = (remaining, 0)
+            # la logique de gain : si IA joue, elle prend la dernière → perd
+            if remaining == 1:
+                self.value_function[state_final] = -1  # IA perd si elle prend la dernière
+            else:
+                self.value_function[state_final] = +1  # IA gagne sinon
+
+    def exploit(self):
+        current_nb = self.game.nb
+        max_take = min(3, current_nb)
+        best_action = 1
+        best_value = float('inf') # on cherche à minimiser la valeur pour l'adversaire
+
+        for action in range(1, max_take + 1):
+            new_state = (current_nb, current_nb - action)  # <-- état correct pour le coup
+            value = self.value_function.get(new_state, 0)  # 0 si jamais l'état n'est pas encore appris
+            if value < best_value:
+                best_value = value
+                best_action = action
+
+        return best_action
+
+    def play(self):
+        current_nb = self.game.nb
+
+        # 1️ Ajouter la transition précédente à l’historique
+        if self.previous_state is not None:
+            new_state = (self.previous_state, current_nb)
+            self.history.append(new_state)
+
+        # 2️ Choisir l’action
+
+        if random.random() < self.epsilon:
+            action = self.exploit()  # meilleure action selon value-function
+        else:
+            max_take = min(3, current_nb)
+            action = random.randint(1, max_take)  # explore
+
+        # 3️ Mettre à jour l’état précédent pour le prochain tour
+        self.previous_state = current_nb # temporaire
+
+        return action
+    
+    def win(self):
+        # Ajouter la dernière transition
+        if self.previous_state is not None:
+            transition = (self.previous_state, 0)  # état final
+            self.history.append(transition)
+
+        #  Appeler la méthode de la super-classe pour le reste
+        super().win()
+
+        # Réinitialiser previous_state
+        self.previous_state = None
+
+
+    def lose(self):
+        if self.previous_state is not None:
+            transition = (self.previous_state, 0)  # état final
+            self.history.append(transition)
+
+        super().lose()
+        self.previous_state = None
