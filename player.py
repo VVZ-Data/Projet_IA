@@ -2,7 +2,6 @@
 Module contenant les classes Player, Human et AI pour le jeu des allumettes.
 """
 import random
-import game_model
 
 
 class Player:
