@@ -111,7 +111,7 @@ class AI(Player):
         self.value_function = {}
 
         #crée tout les états finaux possible
-        for remaining in range(1, game.nb + 1): #création de paire inutile peut-etre reduire à max 3
+        for remaining in range(1, 3): #création de paire inutile peut-etre reduire à max 3
             state_final = (remaining, 0)
             # la logique de gain : si IA joue, elle prend la dernière → perd
             if remaining == 1:
@@ -137,12 +137,12 @@ class AI(Player):
     def play(self):
         current_nb = self.game.nb
 
-        # 1️ Ajouter la transition précédente à l’historique
+        #  Ajouter la transition précédente à l’historique
         if self.previous_state is not None:
             new_state = (self.previous_state, current_nb)
             self.history.append(new_state)
 
-        # 2️ Choisir l’action
+        #  Choisir l’action
 
         if random.random() < self.epsilon:
             action = self.exploit()  # meilleure action selon value-function
@@ -150,7 +150,7 @@ class AI(Player):
             max_take = min(3, current_nb)
             action = random.randint(1, max_take)  # explore
 
-        # 3️ Mettre à jour l’état précédent pour le prochain tour
+        #  Mettre à jour l’état précédent pour le prochain tour
         self.previous_state = current_nb # temporaire
 
         return action

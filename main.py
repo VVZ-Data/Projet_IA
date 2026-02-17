@@ -2,7 +2,7 @@
 Point d'entrée principal du jeu des allumettes.
 Lance une partie avec interface graphique Tkinter.
 """
-from player import Player, Human
+from player import Player, Human, AI
 from game_controller import GameController
 
 
