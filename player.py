@@ -2,7 +2,7 @@
 Module contenant les classes Player, Human et AI pour le jeu des allumettes.
 """
 import random
-
+import json
 
 class Player:
     """
@@ -102,10 +102,10 @@ class Human(Player):
 
 class AI(Player):
 
-    def __init__(self, name, game=None):
+    def __init__(self, name, epsilon=0.9, learning_rate=0.01, game=None):
         super().__init__(name, game)
-        self.epsilon = 0.9
-        self.learning_rate = 0.01
+        self.epsilon = epsilon
+        self.learning_rate = learning_rate
         self.history = []
         self.previous_state = None
         self.value_function = {}
@@ -171,13 +171,43 @@ class AI(Player):
         self.previous_state = None
 
     def train(self):
-        # mise à jour en back-tracking de la value_function
-        for previous_state, state in self.history[::-1]:
-            
-            self.value_function[state] = self.value_function.get(state, 0) + self.learning_rate * (self.value_function.get(previous_state, 0) - self.value_function.get(state, 0))
+            # mise à jour en back-tracking de la value_function
+        next_value = None  # valeur à propager, commence par l'état final
 
-        self.history.clear
+        for previous_state, state in reversed(self.history):
+            current_value = self.value_function.get(state, 0)
+
+            # Si next_value est None, on prend la valeur existante de l'état final
+            if next_value is None:
+                next_value = current_value
+
+            # Mise à jour TD
+            updated_value = current_value + self.learning_rate * (next_value - current_value)
+            self.value_function[state] = updated_value
+
+            # Propage vers l'état précédent
+            next_value = updated_value
+
+        self.history.clear()
 
     def next_epsilon(self, coefficient=0.95, minimum=0.05):
 
         self.epsilon = max(self.epsilon * coefficient, minimum)
+
+    def upload(self, file_name):
+        data = {
+            "epsilon": self.epsilon,
+            "learning_rate": self.learning_rate,
+            "value_function": self.value_function
+        }
+
+        with open(file_name, "w") as f:
+            json.dump(data, f, indent=4)
+    
+    def download(self, filename):
+        with open(filename, "r") as f:
+            data = json.load(f)
+
+        self.epsilon = data["epsilon"]
+        self.learning_rate = data["learning_rate"]
+        self.value_function = data["value_function"]
