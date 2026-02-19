@@ -174,14 +174,14 @@ class AI(Player):
             # mise à jour en back-tracking de la value_function
         next_value = None  # valeur à propager, commence par l'état final
 
-        for previous_state, state in reversed(self.history):
+        for _, state in reversed(self.history):
             current_value = self.value_function.get(state, 0)
 
             # Si next_value est None, on prend la valeur existante de l'état final
             if next_value is None:
                 next_value = current_value
 
-            # Mise à jour TD
+            # Mise à jour 
             updated_value = current_value + self.learning_rate * (next_value - current_value)
             self.value_function[state] = updated_value
 

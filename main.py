@@ -61,14 +61,16 @@ def compare_ai(*ais):
 if __name__ == "__main__":
     #main()
 
-    ai1 = AI("1", 0.9, 0.25)
+    ai1 = AI("1", 0.9, 0.3)
     ai2 = AI("2", 0.9, 0.5)
 
-    training(ai1, ai2, 1000000000, 10)
+    ai1.download("AI_save_1")
+    ai2.download("AI_save_2")
+    
+    training(ai1, ai2, 1_000_000, 100)
 
-    compare_ai(ai1, ai2)
-
-    print(ai1.value_function)
-
+    compare_ai(ai1)
+    
     ai1.upload("AI_save_1")
     ai2.upload("AI_save_2")
+    print("save")
