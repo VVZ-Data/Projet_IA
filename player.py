@@ -110,14 +110,8 @@ class AI(Player):
         self.previous_state = None
         self.value_function = {}
 
-        #crée tout les états finaux possible
-        for remaining in range(1, 3): #création de paire inutile peut-etre reduire à max 3
-            state_final = (remaining, 0)
-            # la logique de gain : si IA joue, elle prend la dernière → perd
-            if remaining == 1:
-                self.value_function[state_final] = -1  # IA perd si elle prend la dernière
-            else:
-                self.value_function[state_final] = +1  # IA gagne sinon
+        self.value_function["win"] = +1
+        self.value_function["lose"] = -1
 
     def exploit(self):
         current_nb = self.game.nb
@@ -126,7 +120,7 @@ class AI(Player):
         best_value = float('inf') # on cherche à minimiser la valeur pour l'adversaire
 
         for action in range(1, max_take + 1):
-            new_state = (current_nb, current_nb - action)  # <-- état correct pour le coup
+            new_state = current_nb - action  # <-- état correct pour le coup
             value = self.value_function.get(new_state, 0)  # 0 si jamais l'état n'est pas encore appris
             if value < best_value:
                 best_value = value
@@ -139,8 +133,8 @@ class AI(Player):
 
         #  Ajouter la transition précédente à l’historique
         if self.previous_state is not None:
-            new_state = (self.previous_state, current_nb)
-            self.history.append(new_state)
+            new_state = self.previous_state - current_nb
+            self.history.append((new_state, self.previous_state))
 
         #  Choisir l’action
 
@@ -158,7 +152,7 @@ class AI(Player):
     def win(self):
         # Ajouter la dernière transition
         if self.previous_state is not None:
-            transition = (self.previous_state, 0)  # état final
+            transition = (self.previous_state, "win")  # état final
             self.history.append(transition)
 
         #  Appeler la méthode de la super-classe pour le reste
@@ -170,8 +164,20 @@ class AI(Player):
 
     def lose(self):
         if self.previous_state is not None:
-            transition = (self.previous_state, 0)  # état final
+            transition = (self.previous_state, "lose")  # état final
             self.history.append(transition)
 
         super().lose()
         self.previous_state = None
+
+    def train(self):
+        # mise à jour en back-tracking de la value_function
+        for previous_state, state in self.history[::-1]:
+            
+            self.value_function[state] = self.value_function.get(state, 0) + self.learning_rate * (self.value_function.get(previous_state, 0) - self.value_function.get(state, 0))
+
+        self.history.clear
+
+    def next_epsilon(self, coefficient=0.95, minimum=0.05):
+
+        self.epsilon = max(self.epsilon * coefficient, minimum)
