@@ -4,6 +4,7 @@ Module contenant les classes Player, Human et AI pour le jeu des allumettes.
 import random
 import json
 
+
 class Player:
     """
     Représente un joueur de base (random) dans le jeu des allumettes.
@@ -114,18 +115,18 @@ class AI(Player):
         self.value_function["lose"] = -1
 
     def exploit(self):
+        vf = self.value_function
         current_nb = self.game.nb
         max_take = min(3, current_nb)
         best_action = 1
-        best_value = float('inf') # on cherche à minimiser la valeur pour l'adversaire
+        best_value = float('inf')
 
         for action in range(1, max_take + 1):
-            new_state = current_nb - action  # <-- état correct pour le coup
-            value = self.value_function.get(new_state, 0)  # 0 si jamais l'état n'est pas encore appris
+            new_state = current_nb - action
+            value = vf.get(new_state, 0)
             if value < best_value:
                 best_value = value
                 best_action = action
-
         return best_action
 
     def play(self):
@@ -133,20 +134,19 @@ class AI(Player):
 
         #  Ajouter la transition précédente à l’historique
         if self.previous_state is not None:
-            new_state = self.previous_state - current_nb
-            self.history.append((new_state, self.previous_state))
+            self.history.append((self.previous_state, current_nb))
 
         #  Choisir l’action
 
         if random.random() < self.epsilon:
-            action = self.exploit()  # meilleure action selon value-function
-        else:
             max_take = min(3, current_nb)
             action = random.randint(1, max_take)  # explore
+        else:
+            action = self.exploit()  # meilleure action selon value-function
+
 
         #  Mettre à jour l’état précédent pour le prochain tour
         self.previous_state = current_nb # temporaire
-
         return action
     
     def win(self):
@@ -171,24 +171,13 @@ class AI(Player):
         self.previous_state = None
 
     def train(self):
-            # mise à jour en back-tracking de la value_function
-        next_value = None  # valeur à propager, commence par l'état final
-
-        for _, state in reversed(self.history):
-            current_value = self.value_function.get(state, 0)
-
-            # Si next_value est None, on prend la valeur existante de l'état final
-            if next_value is None:
-                next_value = current_value
-
-            # Mise à jour 
-            updated_value = current_value + self.learning_rate * (next_value - current_value)
-            self.value_function[state] = updated_value
-
-            # Propage vers l'état précédent
-            next_value = updated_value
-
+        snapshot = dict(self.value_function)
+        for s, s_prime in reversed(self.history):
+            v_s       = snapshot.get(s, 0)
+            v_s_prime = snapshot.get(s_prime, 0)
+            self.value_function[s] = v_s + self.learning_rate * (v_s_prime - v_s)
         self.history.clear()
+
 
     def next_epsilon(self, coefficient=0.95, minimum=0.05):
 
@@ -211,3 +200,11 @@ class AI(Player):
         self.epsilon = data["epsilon"]
         self.learning_rate = data["learning_rate"]
         self.value_function = data["value_function"]
+
+            # Reconvertir les clés numériques en int
+        self.value_function = {}
+        for key, value in data["value_function"].items():
+            try:
+                self.value_function[int(key)] = value  # "12" -> 12
+            except ValueError:
+                self.value_function[key] = value  # "win", "lose" restent des strings

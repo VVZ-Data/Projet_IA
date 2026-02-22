@@ -58,19 +58,40 @@ def compare_ai(*ais):
             print(f"{value:^15.3}", end='')
         print()
 
+def testing(ai, random_player, nb_games):
+    test_game = GameModel(12, ai, random_player, displayable=False)
+    wins = 0
+    for i in range(nb_games):
+        test_game.play()
+        # ai.train() ← NE PAS appeler
+        if test_game.get_winner() == ai:
+            wins +=1 
+        test_game.reset()
+
+    print(f"{wins/nb_games*100:.2f}%")
+
 if __name__ == "__main__":
     #main()
 
     ai1 = AI("1", 0.9, 0.3)
-    ai2 = AI("2", 0.9, 0.5)
+    ai2 = AI("2", 0.9, 0.3)
+    random_player = Player("3")
 
     ai1.download("AI_save_1")
-    ai2.download("AI_save_2")
+    #ai2.download("AI_save_2")
     
-    training(ai1, ai2, 1_000_000, 100)
+    training(ai1, ai2, 100_000, 9500)
 
-    compare_ai(ai1)
+    compare_ai(ai1, ai2)
     
+    epsilon_save = ai1.epsilon
+    epsilon_save_2 = ai2.epsilon
+    ai1.epsilon = 0
+    ai2.epsilon = 0
+    testing(ai1, random_player, 100_000)
+    compare_ai(ai1)
+    ai1.epsilon = epsilon_save
+    ai2.epsilon = epsilon_save_2
     ai1.upload("AI_save_1")
     ai2.upload("AI_save_2")
     print("save")
