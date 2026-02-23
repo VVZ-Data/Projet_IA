@@ -171,10 +171,10 @@ class AI(Player):
         self.previous_state = None
 
     def train(self):
-        snapshot = dict(self.value_function)
+
         for s, s_prime in reversed(self.history):
-            v_s       = snapshot.get(s, 0)
-            v_s_prime = snapshot.get(s_prime, 0)
+            v_s       = self.value_function.get(s, 0)
+            v_s_prime = self.value_function.get(s_prime, 0)
             self.value_function[s] = v_s + self.learning_rate * (v_s_prime - v_s)
         self.history.clear()
 
@@ -200,11 +200,3 @@ class AI(Player):
         self.epsilon = data["epsilon"]
         self.learning_rate = data["learning_rate"]
         self.value_function = data["value_function"]
-
-            # Reconvertir les clés numériques en int
-        self.value_function = {}
-        for key, value in data["value_function"].items():
-            try:
-                self.value_function[int(key)] = value  # "12" -> 12
-            except ValueError:
-                self.value_function[key] = value  # "win", "lose" restent des strings
