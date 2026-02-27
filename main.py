@@ -91,5 +91,3 @@ if __name__ == "__main__":
 
     testing(ai1, random_player, 100_000)
     #compare_ai(ai1)
-
-    print("save")

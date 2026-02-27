@@ -156,7 +156,7 @@ class GameModel:
         while not self.is_game_over():
             self.display()
             current = self.get_current_player()
-            action = current.play()
+            action = current.play(self.nb) # passe l'état même si le joueur en a pas besoin 
             self.step(action)
             if not self.is_game_over():
                 self.switch_player()
