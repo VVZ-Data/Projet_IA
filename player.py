@@ -1,7 +1,8 @@
 """
-Module contenant les classes Player et Human pour le jeu des allumettes.
+Module contenant les classes Player, Human et AI pour le jeu des allumettes.
 """
 import random
+import json
 
 
 class Player:
@@ -99,3 +100,103 @@ class Human(Player):
                 print("Please enter 1, 2 or 3.")
             except ValueError:
                 print("Invalid input. Please enter a number.")
+
+class AI(Player):
+
+    def __init__(self, name, epsilon=0.9, learning_rate=0.01, game=None):
+        super().__init__(name, game)
+        self.epsilon = epsilon
+        self.learning_rate = learning_rate
+        self.history = []
+        self.previous_state = None
+        self.value_function = {}
+
+        self.value_function["win"] = +1
+        self.value_function["lose"] = -1
+
+    def exploit(self):
+        vf = self.value_function
+        current_nb = self.game.nb
+        max_take = min(3, current_nb)
+        best_action = 1
+        best_value = float('inf')
+
+        for action in range(1, max_take + 1):
+            new_state = current_nb - action
+            value = vf.get(new_state, 0)
+            if value < best_value:
+                best_value = value
+                best_action = action
+        return best_action
+
+    def play(self):
+        current_nb = self.game.nb
+
+        #  Ajouter la transition précédente à l’historique
+        if self.previous_state is not None:
+            self.history.append((self.previous_state, current_nb))
+
+        #  Choisir l’action
+
+        if random.random() < self.epsilon:
+            max_take = min(3, current_nb)
+            action = random.randint(1, max_take)  # explore
+        else:
+            action = self.exploit()  # meilleure action selon value-function
+
+
+        #  Mettre à jour l’état précédent pour le prochain tour
+        self.previous_state = current_nb # temporaire
+        return action
+    
+    def win(self):
+        # Ajouter la dernière transition
+        if self.previous_state is not None:
+            transition = (self.previous_state, "win")  # état final
+            self.history.append(transition)
+
+        #  Appeler la méthode de la super-classe pour le reste
+        super().win()
+
+        # Réinitialiser previous_state
+        self.previous_state = None
+
+
+    def lose(self):
+        if self.previous_state is not None:
+            transition = (self.previous_state, "lose")  # état final
+            self.history.append(transition)
+
+        super().lose()
+        self.previous_state = None
+
+    def train(self):
+
+        for s, s_prime in reversed(self.history):
+            v_s       = self.value_function.get(s, 0)
+            v_s_prime = self.value_function.get(s_prime, 0)
+            self.value_function[s] = v_s + self.learning_rate * (v_s_prime - v_s)
+        self.history.clear()
+
+
+    def next_epsilon(self, coefficient=0.95, minimum=0.05):
+
+        self.epsilon = max(self.epsilon * coefficient, minimum)
+
+    def upload(self, file_name):
+        data = {
+            "epsilon": self.epsilon,
+            "learning_rate": self.learning_rate,
+            "value_function": self.value_function
+        }
+
+        with open(file_name, "w") as f:
+            json.dump(data, f, indent=4)
+    
+    def download(self, filename):
+        with open(filename, "r") as f:
+            data = json.load(f)
+
+        self.epsilon = data["epsilon"]
+        self.learning_rate = data["learning_rate"]
+        self.value_function = data["value_function"]
