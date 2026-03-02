@@ -1,95 +1,119 @@
-# 🎮 Matchstick Game — Jeu des Allumettes
+# 🎮 Matchstick Game — Projet de Conception IA
 
-Application Python multi-jeux avec interface graphique Tkinter et système multilingue (FR/EN).
-Développé dans le cadre du cours **IN252 - Projet de conception IA** (HENaLLux).
-
----
-
-## 📋 Description
-
-Le jeu des allumettes se joue à deux. Au départ, un certain nombre d'allumettes sont posées sur la table. 
-Chaque joueur retire à son tour 1, 2 ou 3 allumettes. **Le joueur qui prend la dernière allumette perd.**
-
-### Types de joueurs disponibles
-- **Human** : joueur humain interagissant via l'interface graphique
-- **AI** : intelligence artificielle entraînable par renforcement (Q-learning)
-- **Player (Random)** : joueur aléatoire
+> Jeu des Allumettes (variante Misère du Jeu de Nim) avec agents d'Intelligence Artificielle à apprentissage autonome.  
+> Développé dans le cadre du cursus **IN252** à l'**HENaLLux**.
 
 ---
 
-## ✨ Fonctionnalités
+## 📋 Table des Matières
 
-- 🌍 **Interface multilingue** (Français / English) avec changement à la volée
-- 🎮 **3 modes de jeu** : Humain vs IA, Humain vs Random, IA vs IA
-- 🤖 **Entraînement d'IA** par apprentissage par renforcement avec :
-  - Configuration des paramètres (nombre de parties, learning rate, epsilon decay)
-  - Barre de progression en temps réel
-  - Analyse des résultats et statistiques détaillées
-  - Sauvegarde/chargement des modèles entraînés
-- 🎨 **Interface moderne** avec design épuré et animations
-- 📊 **Architecture MVC** stricte avec séparation modèle/vue/contrôleur
+- [Description du Jeu](#-description-du-jeu)
+- [Fonctionnalités Clés](#-fonctionnalités-clés)
+- [Architecture Logicielle (MVC)](#-architecture-logicielle-mvc)
+- [Intelligence Artificielle & Apprentissage](#-intelligence-artificielle--apprentissage)
+- [Guide d'Installation & Lancement](#-guide-dinstallation--lancement)
+- [Manuel d'Utilisation](#-manuel-dutilisation)
+- [Qualité du Code & Standards](#-qualité-du-code--standards)
+- [Auteurs & Crédits](#-auteurs--crédits)
 
 ---
 
-## 🏗️ Architecture
+## 📖 Description du Jeu
+
+Le jeu des allumettes est un **jeu de duel mathématique symétrique** :
+
+| Étape | Description |
+|-------|-------------|
+| **Initialisation** | Un nombre défini d'allumettes est disposé sur le plateau. |
+| **Déroulement** | Chaque joueur retire, à tour de rôle, **1, 2 ou 3 allumettes**. |
+| **Victoire** | Variante **Misère** : le joueur qui retire la **dernière allumette perd**. |
+
+---
+
+## ✨ Fonctionnalités Clés
+
+### 🌍 Système Multilingue Dynamique
+Bascule instantanée entre **Français** et **Anglais** sans redémarrage, via un gestionnaire d'états centralisé.
+
+### 🎮 Modes de Jeu Versatiles
+- **Humain vs IA** — Testez vos capacités contre un modèle entraîné.
+- **Humain vs Random** — Mode détente contre un algorithme stochastique.
+- **IA vs IA** — Observez deux agents s'affronter pour valider la convergence des stratégies.
+
+### 🤖 Laboratoire d'Entraînement
+- Configuration granulaire des hyperparamètres (**Epsilon**, **Learning Rate**).
+- Entraînement dissocié des agents (IA 1 ou IA 2).
+- Monitoring en temps réel via barre de progression et statistiques de performance.
+- Système de **sauvegarde persistante (JSON)** pour conserver les modèles les plus performants.
+
+---
+
+## 🏗️ Architecture Logicielle (MVC)
+
+Le projet adopte une **séparation stricte des préoccupations** grâce au patron Modèle-Vue-Contrôleur.
 
 ```
-matchstick_refactored/
-├── main.py                  # Point d'entrée et navigation
-├── translations.py          # Dictionnaire de traductions FR/EN
-├── language_manager.py      # Gestionnaire de langue (Singleton)
-├── player.py                # Classes Player, Human, AI
-├── game_model.py            # Logique du jeu (Modèle)
-├── game_controller.py       # Contrôleur MVC
+Projet_IA/
+├── main.py
+├── game_model.py        # Modèle — état du jeu & règles métier
+├── player.py            # Modèle — comportements de décision (Random, Q-Learning)
+├── game_controller.py   # Contrôleur — médiateur Vue ↔ Modèle
 ├── views/
-│   ├── __init__.py
-│   ├── home_view.py         # Page d'accueil (sélection de jeux)
-│   ├── matchstick_menu_view.py  # Menu (Jouer / Entraîner)
-│   ├── game_view.py         # Interface de jeu
-│   └── training_view.py     # Interface d'entraînement
-├── requirements.txt
-├── .gitignore
-└── README.md
+│   ├── home_view.py     # Hub de navigation principal
+│   ├── game_view.py     # Rendu graphique Canvas des allumettes
+│   └── training_view.py # Dashboard de contrôle de l'apprentissage
+├── AI_save_1.json       # Sauvegarde persistante agent 1
+├── AI_save_2.json       # Sauvegarde persistante agent 2
+└── requirements.txt
 ```
+
+### 1. Le Modèle (`game_model.py`, `player.py`)
+Encapsule l'état du système et les règles métier.
+- **`GameModel`** — Gère le stock d'allumettes et la validation des coups.
+- **`Player` & `AI`** — Définissent les comportements de décision, de l'aléatoire simple au Q-Learning complexe.
+
+### 2. La Vue (`views/`)
+Modules Tkinter indépendants pour une interface moderne et réactive.
+- **`home_view.py`** — Hub de navigation principal.
+- **`game_view.py`** — Rendu graphique dynamique des allumettes sur Canvas.
+- **`training_view.py`** — Dashboard de contrôle de l'apprentissage.
+
+### 3. Le Contrôleur (`game_controller.py`)
+Agit comme **médiateur**, interceptant les événements utilisateurs de la Vue pour mettre à jour le Modèle.
 
 ---
 
-## ⚙️ Installation
+## 🤖 Intelligence Artificielle & Apprentissage
+
+L'agent intelligent repose sur l'algorithme de **Q-Learning** (Reinforcement Learning).
+
+| Composant | Description |
+|-----------|-------------|
+| **V-Function** | Dictionnaire associant chaque état (nb d'allumettes) à une valeur de récompense attendue. |
+| **Politique ε-Greedy** | Alternance entre **Exploration** (coups aléatoires) et **Exploitation** (meilleures connaissances). |
+| **Apprentissage TD** | Valeurs mises à jour après chaque action en fonction du résultat (victoire / défaite). |
+| **Epsilon Decay** | Réduction progressive du taux d'exploration pour stabiliser la stratégie optimale. |
+
+---
+
+## ⚙️ Guide d'Installation & Lancement
 
 ### Prérequis
-- Python 3.8 ou supérieur → https://www.python.org/downloads/
-- `tkinter` (inclus avec Python)
+- **Python 3.8+**
+- `tkinter` (inclus par défaut dans la plupart des distributions Python)
 
-### Étapes
-
-#### 1. Télécharger le projet
+### Installation
 
 ```bash
+# 1. Clonage du dépôt
 git clone https://github.com/VVZ-Data/Projet_IA.git
 cd Projet_IA
-```
 
-Ou télécharger le ZIP depuis GitHub → Code → Download ZIP
-
-#### 2. Créer l'environnement virtuel (optionnel mais recommandé)
-
-```bash
-python -m venv env
-
-# Windows
-env\Scripts\activate
-
-# Unix / macOS
-source env/bin/activate
-```
-
-#### 3. Installer les dépendances
-
-```bash
+# 2. Installation des dépendances de développement
 pip install -r requirements.txt
 ```
 
-#### 4. Lancer l'application
+### Lancement
 
 ```bash
 python main.py
@@ -97,70 +121,48 @@ python main.py
 
 ---
 
-## 🎲 Guide d'utilisation
+## 🎲 Manuel d'Utilisation
 
-### Page d'accueil
-- Cliquez sur **"Jeu des Allumettes"** pour y jouer
-- Changez de langue avec le bouton **EN/FR** en haut à droite
+### Navigation
+1. **Accueil** — Sélectionnez *"Jeu des Allumettes"*. Utilisez le bouton **EN/FR** pour changer la langue.
+2. **Menu** — Choisissez entre *"Jouer"* (immédiat) ou *"Entraîner"* (configuration).
 
-### Menu du jeu
-- **Jouer** : Choisissez "vs IA" ou "vs Random"
-- **Entraîner l'IA** : Lancez un entraînement personnalisé
+### Sessions d'Entraînement
 
-### Pendant le jeu
-- Cliquez sur **"Take 1"**, **"Take 2"** ou **"Take 3"** pour prendre des allumettes
-- Le joueur qui prend la **dernière allumette perd**
-- Cliquez sur **"Rejouer"** pour une nouvelle partie
-- Cliquez sur **"Quitter"** pour retourner au menu
+Pour obtenir une IA imbattable, suivez ces recommandations :
 
-### Entraînement de l'IA
-1. Configurez les paramètres :
-   - **Nombre de parties** : plus il y en a, meilleure est l'IA (100 000 recommandé)
-   - **Diminution epsilon** : fréquence de passage exploitation/exploration (tous les 5000)
-   - **Learning rate** : vitesse d'apprentissage (0.3 recommandé)
-2. Cliquez sur **"Lancer l'Entraînement"**
-3. Attendez la fin (barre de progression)
-4. Analysez les résultats affichés
-5. Les modèles entraînés sont sauvegardés automatiquement
+| Paramètre | Valeur recommandée | Raison |
+|-----------|-------------------|--------|
+| **Nombre de parties** | ≥ 100 000 | Convergence assurée |
+| **Learning Rate** | `0.3` | Équilibre vitesse / stabilité |
+| **Epsilon Decay** | `5000` | Exploration suffisante en début d'entraînement |
+
+> **💾 Sauvegarde** — Les résultats ne sont persistés dans `AI_save_1` ou `AI_save_2` que sur **validation manuelle** après analyse des résultats.
 
 ---
 
-## 🧹 Qualité du code
+## 🧹 Qualité du Code & Standards
 
-Le code respecte :
-- ✅ **PEP 8** (style Python standard)
-- ✅ **Clean Code** : fonctions < 20 lignes, noms explicites, DRY
-- ✅ **Type Hinting** complet
-- ✅ **Docstrings** détaillées sur TOUTES les fonctions/classes/méthodes
-- ✅ **Commentaires explicatifs** en français dans tout le code
-- ✅ **Architecture MVC** avec séparation stricte des responsabilités
-- ✅ **Pattern Observer** pour le système de traductions
-- ✅ **Pattern Singleton** pour le gestionnaire de langue
+| Standard | Détail |
+|----------|--------|
+| ✅ **Architecture MVC** | Découplage total logique / interface. |
+| ✅ **Pattern Singleton** | Gestion unique du `LanguageManager`. |
+| ✅ **Pattern Observer** | Notification automatique des changements de langue à toutes les vues actives. |
+| ✅ **Type Hinting** | Utilisation systématique des indices de type pour une meilleure robustesse. |
+| ✅ **Conformité PEP 8** | Code clair, nommé explicitement et documenté via Docstrings. |
 
 ---
 
-## 🤖 Algorithme d'apprentissage
+## 👥 Auteurs & Crédits
 
-L'IA utilise **Q-Learning** (apprentissage par renforcement) :
+| Nom | GitHub |
+|-----|--------|
+| **Victor Van Zieghem** | [@VVZ-Data](https://github.com/VVZ-Data) |
+| **Ethan Nickels** | [@Etrix425](https://github.com/Etrix425) |
 
-- **V-function** : dictionnaire {état → valeur}
-- **Exploration/Exploitation** : politique ε-greedy
-- **TD-Learning** : mise à jour des valeurs après chaque partie
-- **Epsilon decay** : réduction progressive de l'exploration
-
-Stratégie optimale découverte par l'IA : laisser toujours un multiple de 4 allumettes à l'adversaire.
-
----
-
-## 👥 Auteurs
-
-- **Victor Van Zieleghem**
-- **Ethan Nickels**
-
-Groupe : B3 Info — HENaLLux 2025-2026
+**Institution** : HENaLLux (B3 Info)  
+**Année Académique** : 2025–2026
 
 ---
 
-## 📄 Licence
-
-Projet académique — Tous droits réservés
+> *Ce projet est réalisé à des fins pédagogiques. Tous droits réservés.*
