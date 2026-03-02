@@ -101,7 +101,7 @@ class MatchstickMenuView(Frame):
         
         tk.Label(
             train_card,
-            text="🤖 " + lang_manager.get_text("train_ai1"),
+            text="🤖 " + lang_manager.get_text("train_ai"),
             font=("Helvetica", 24, "bold"),
             bg=self.CARD_BG,
             fg=self.ACCENT_COLOR

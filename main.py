@@ -10,7 +10,7 @@ from views.home_view import HomeView
 from views.matchstick_menu_view import MatchstickMenuView
 from views.game_view import GameView
 from views.training_view import TrainingView
-from language_manager import lang_manager
+# from language_manager import lang_manager
 
 
 class MainApplication(tk.Tk):
