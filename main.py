@@ -6,19 +6,19 @@ from player import Player, Human, AI
 from game_controller import GameController
 from game_model import GameModel
 
-"""
+
 def main() -> None:
     """
     #Point d'entrée du programme. Crée les joueurs, le contrôleur et démarre le jeu.
-"""
+    """
     # Création des joueurs
     human = Human("Player 1")
-    random_bot = AI("Random Bot")
+    random_bot = Player("Random Bot")
 
     # Lancement du jeu via le contrôleur (15 allumettes par défaut)
     controller = GameController(human, random_bot, total_matches=15)
     controller.start()
-"""
+
 def training(ai1, ai2, nb_games, nb_epsilon):
     # Train the AIs @ai1 and @ai2 during @nb_games games
     # epsilon decrease every @nb_epsilon games
@@ -70,28 +70,28 @@ def testing(ai, random_player, nb_games):
     print(f"{wins/nb_games*100:.2f}%")
 
 if __name__ == "__main__":
-    #main()
+    main()
 
-    ai1 = AI("1", 0.9, 0.3) #bon taux
-    ai2 = AI("2", 0.9, 0.9) #trop aléatoire 
-    ai3 = AI("3", 0.9, 0.1) #trop lent 
-    ai4 = AI("4", 0.9, 0.5) #aléatoire
-    random_player = Player("3")
+    #i1 = AI("1", 0.9, 0.3) #bon taux
+    #ai2 = AI("2", 0.9, 0.9) #trop aléatoire 
+    #ai3 = AI("3", 0.9, 0.1) #trop lent 
+    #ai4 = AI("4", 0.9, 0.5) #aléatoire
+    #random_player = Player("3")
 
-    ai1.download("AI_save_1")
+    #ai1.download("AI_save_1")
     #ai2.download("AI_save_2")
     #training(ai1, random_player, 100_000, 10)
-    training(ai1, ai2, 100_000, 10_000)
+    #training(ai1, ai2, 100_000, 10_000)
 
-    training(ai2, ai4, 100_000, 10_000)
-    compare_ai(ai1, ai2)
-    compare_ai(ai1, ai4)
+    #training(ai2, ai4, 100_000, 10_000)
+    #compare_ai(ai1, ai2)
+    #compare_ai(ai1, ai4)
     
-    ai1.upload("AI_save_1")
-    ai2.upload("AI_save_2")
+    #ai1.upload("AI_save_1")
+    #ai2.upload("AI_save_2")
 
-    ai1.epsilon = 0
-    ai3.epsilon = 0
+    #ai1.epsilon = 0
+    #ai3.epsilon = 0
 
-    testing(ai1, ai4, 100_000)
+    #testing(ai1, ai4, 100_000)
     #compare_ai(ai1)

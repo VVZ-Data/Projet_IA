@@ -115,7 +115,7 @@ class GameController:
         Precondition: Le joueur actuel doit être une IA (Player mais pas Human).
         """
         # Récupérer le coup de l'IA et l'appliquer
-        action = self.model.get_current_player().play()
+        action = self.model.get_current_player().play(self.model.get_nb)
         self.model.step(action)
 
         if self.model.is_game_over():
