@@ -1,0 +1,33 @@
+# Environnements virtuels
+env/
+venv/
+.env/
+.venv/
+
+# Fichiers Python compilés
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+
+# Variables d'environnement sensibles
+.env
+
+# Fichiers de l'IDE
+.vscode/
+.idea/
+*.swp
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Logs et bases de données temporaires
+*.log
+*.db
+*.sqlite3
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
