@@ -92,14 +92,17 @@ class Human(Player):
             int: Le choix valide de l'utilisateur entre 1 et 3.
         """
         # Boucle jusqu'à obtenir un choix valide
-        while True:
+        choice = 0
+
+        while choice not in (1, 2, 3):
             try:
                 choice = int(input("How many matches do you want to take? (1, 2 or 3): "))
-                if choice in (1, 2, 3):
-                    return choice
-                print("Please enter 1, 2 or 3.")
+                if choice not in (1, 2, 3):
+                    print("Please enter 1, 2 or 3.")
             except ValueError:
                 print("Invalid input. Please enter a number.")
+
+        return choice
 
 class AI(Player):
     """"
