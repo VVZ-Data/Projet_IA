@@ -49,6 +49,11 @@ class GameModel:
         self.shuffle()
 
     @property
+    def get_nb(self) -> int:
+        """
+        Retourne le nombre d'allumettes
+        """
+        return self.nb
     def players(self) -> list:
         """
         Retourne la liste des deux joueurs.
@@ -117,7 +122,8 @@ class GameModel:
         Returns:
             Player: Le joueur actuel.
         """
-        return self.players[self.current_player]
+        current = self.players()
+        return current[self.current_player]
 
     def get_winner(self) -> Optional[Player]:
         """
@@ -131,7 +137,8 @@ class GameModel:
         if not self.is_game_over():
             return None
         # Celui qui a pris la dernière allumette perd — donc l'autre gagne
-        return self.players[1 - self.current_player]
+        winner = self.players()
+        return winner[1 - self.current_player]
 
     def get_loser(self) -> Optional[Player]:
         """

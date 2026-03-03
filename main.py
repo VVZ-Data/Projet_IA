@@ -6,14 +6,14 @@ from player import Player, Human, AI
 from game_controller import GameController
 from game_model import GameModel
 
-"""
+""""
 def main() -> None:
     """
     #Point d'entrée du programme. Crée les joueurs, le contrôleur et démarre le jeu.
 """
     # Création des joueurs
     human = Human("Player 1")
-    random_bot = AI("Random Bot")
+    random_bot = Player("Random Bot")
 
     # Lancement du jeu via le contrôleur (15 allumettes par défaut)
     controller = GameController(human, random_bot, total_matches=15)
@@ -79,8 +79,8 @@ if __name__ == "__main__":
     random_player = Player("3")
 
     ai1.download("AI_save_1")
-    #ai2.download("AI_save_2")
-    #training(ai1, random_player, 100_000, 10)
+    ai2.download("AI_save_2")
+    training(ai1, random_player, 100_000, 10)
     training(ai1, ai2, 100_000, 10_000)
 
     training(ai2, ai4, 100_000, 10_000)
@@ -94,4 +94,4 @@ if __name__ == "__main__":
     ai3.epsilon = 0
 
     testing(ai1, ai4, 100_000)
-    #compare_ai(ai1)
+    compare_ai(ai1)
