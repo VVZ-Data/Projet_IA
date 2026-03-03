@@ -71,12 +71,21 @@ def testing(ai, random_player, nb_games):
 
 if __name__ == "__main__":
     main()
+<<<<<<< Updated upstream
 
     #i1 = AI("1", 0.9, 0.3) #bon taux
     #ai2 = AI("2", 0.9, 0.9) #trop aléatoire 
     #ai3 = AI("3", 0.9, 0.1) #trop lent 
     #ai4 = AI("4", 0.9, 0.5) #aléatoire
     #random_player = Player("3")
+=======
+    """
+    ai1 = AI("1", 0.9, 0.3) #bon taux
+    ai2 = AI("2", 0.9, 0.9) #trop aléatoire 
+    ai3 = AI("3", 0.9, 0.1) #trop lent 
+    ai4 = AI("4", 0.9, 0.5) #aléatoire
+    random_player = Player("3")
+>>>>>>> Stashed changes
 
     #ai1.download("AI_save_1")
     #ai2.download("AI_save_2")
@@ -95,3 +104,4 @@ if __name__ == "__main__":
 
     #testing(ai1, ai4, 100_000)
     #compare_ai(ai1)
+    """
