@@ -82,8 +82,9 @@ if __name__ == "__main__":
 
     #ai1.download("AI_save_1")
     #ai2.download("AI_save_2")
-    training(ai1, ai2, 100_000, 1000)
-    training(ai3, random_player, 100_000, 1000)
+    training(ai1, random_player, 100_000, 2000)
+    training(ai1, ai2, 100_000, 2000)
+    training(ai3, random_player, 100_000, 2000)
     #training(ai3, random_player, 7000, 1000)
 
     #training(ai2, ai4, 100_000, 10_000)
