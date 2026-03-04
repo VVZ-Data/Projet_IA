@@ -13,10 +13,13 @@ def main() -> None:
     """
     # Création des joueurs
     human = Human("Player 1")
-    random_bot = Player("Random Bot")
+    ai_hard = AI("AI hard")
+
+    # DL IA
+    ai_hard.download("2")
 
     # Lancement du jeu via le contrôleur (15 allumettes par défaut)
-    controller = GameController(human, random_bot, total_matches=15)
+    controller = GameController(human, ai_hard, total_matches=12)
     controller.start()
 
 def training(ai1, ai2, nb_games, nb_epsilon):
