@@ -72,26 +72,21 @@ def testing(ai, random_player, nb_games):
 if __name__ == "__main__":
     #main()
 
-    ai1 = AI("1", 0.9, 0.3) #bon taux
-    ai2 = AI("2", 0.9, 0.9) #trop aléatoire 
-    ai3 = AI("3", 0.9, 0.1) #trop lent 
-    ai4 = AI("4", 0.9, 0.5) #aléatoire
-    random_player = Player("3")
+    ai1 = AI("1", 0.9, 0.001) # -> forte mais entrainement plus long (changer e en 0.5 pour être aleatoire au moment du jeux)
+    ai2 = AI("2", 0.9, 0.01) # -> forte entrainement bon 
+    ai3 = AI("3", 0.9, 0.05) # -> nul entrainement que contre random
+    random_player = Player("4")
 
-    ai1.download("AI_save_1")
-    ai2.download("AI_save_2")
-    training(ai1, random_player, 100_000, 10)
-    training(ai1, ai2, 100_000, 10_000)
+    #ai1.download("AI_save_1")
+    #ai2.download("AI_save_2")
+    training(ai1, ai2, 100_000, 1000)
+    training(ai3, random_player, 100_000, 1000)
+    #training(ai3, random_player, 7000, 1000)
 
-    training(ai2, ai4, 100_000, 10_000)
+    #training(ai2, ai4, 100_000, 10_000)
     compare_ai(ai1, ai2)
-    compare_ai(ai1, ai4)
+    compare_ai(ai1, ai3)
     
-    ai1.upload("AI_save_1")
-    ai2.upload("AI_save_2")
-
-    ai1.epsilon = 0
-    ai3.epsilon = 0
-
-    testing(ai1, ai4, 100_000)
-    compare_ai(ai1)
+    ai1.upload("1")
+    ai2.upload("2")
+    ai3.upload("3")

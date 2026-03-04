@@ -3,6 +3,7 @@ Module contenant les classes Player, Human et AI pour le jeu des allumettes.
 """
 import random
 import json
+from pathlib import Path
 
 
 class Player:
@@ -252,7 +253,7 @@ class AI(Player):
         """
         self.epsilon = max(self.epsilon * coefficient, minimum)
 
-    def upload(self, file_name):
+    def upload(self, ai_number):
         """
         Sauvegarde les paramètres de l’IA dans un fichier JSON.
 
@@ -264,16 +265,19 @@ class AI(Player):
         Args:
             file_name (str): Nom du fichier de sauvegarde.
         """
+        BASE_DIR = Path(__file__).parent
+        save_path = BASE_DIR / f"AI_save_{ai_number}.json"
+
         data = {
             "epsilon": self.epsilon,
             "learning_rate": self.learning_rate,
             "value_function": self.value_function
         }
 
-        with open(file_name, "w") as f:
+        with open(save_path, "w") as f:
             json.dump(data, f, indent=4)
     
-    def download(self, filename):
+    def download(self, ai_number):
         """
         Charge les paramètres de l’IA depuis un fichier JSON.
 
@@ -285,7 +289,10 @@ class AI(Player):
         Args:
             filename (str): Nom du fichier à charger.
         """
-        with open(filename, "r") as f:
+        BASE_DIR = Path(__file__).parent
+        save_path = BASE_DIR / f"AI_save_{ai_number}.json"
+
+        with open(save_path, "r") as f:
             data = json.load(f)
 
         self.epsilon = data["epsilon"]
