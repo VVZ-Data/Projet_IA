@@ -87,8 +87,5 @@ if __name__ == "__main__":
     compare_ai(ai1, ai2)
     compare_ai(ai1, ai3)
     
-    ai1.upload("AI_save_1")
-    ai2.upload("AI_save_2")
-
-    ai1.epsilon = 0
-    ai3.epsilon = 0
+    ai1.upload("1")
+    ai2.upload("2")
