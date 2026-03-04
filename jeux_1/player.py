@@ -141,14 +141,13 @@ class AI(Player):
         Returns:
             int: Nombre d’objets à prendre.
         """
-
         max_take = min(3, state)
         best_action = 1
         best_value = float('inf')
 
         for action in range(1, max_take + 1):
             new_state = state - action
-            value = self.value_function.get(new_state, 0)
+            value = self.value_function.get(new_state, self.value_function.get("win", -1))
             if value < best_value:
                 best_value = value
                 best_action = action
@@ -173,7 +172,6 @@ class AI(Player):
             self.history.append((self.previous_state, state))
 
         #  Choisir l’action
-
         if random.random() < self.epsilon:
             max_take = min(3, state)
             action = random.randint(1, max_take)  # explore
@@ -237,7 +235,7 @@ class AI(Player):
             value_s = self.value_function.get(s, 0)
             value_s_prime = self.value_function.get(s_prime, 0)
 
-            self.value_function[s] = value_s + self.learning_rate * (value_s_prime - value_s)
+            self.value_function[s] = value_s + self.learning_rate * (- value_s_prime - value_s)
         self.history.clear()
 
 
@@ -298,3 +296,11 @@ class AI(Player):
         self.epsilon = data["epsilon"]
         self.learning_rate = data["learning_rate"]
         self.value_function = data["value_function"]
+
+            # Convertir les clés string en int
+        self.value_function = {}
+        for k, v in data["value_function"].items():
+            try:
+                self.value_function[int(k)] = v  # '8' → 8
+            except ValueError:
+                self.value_function[k] = v  # garder 'win' et 'lose' comme strings
