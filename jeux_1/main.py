@@ -72,7 +72,7 @@ def testing(ai, random_player, nb_games):
 if __name__ == "__main__":
     #main()
 
-    ai1 = AI("1", 0.9, 0.001) # -> forte mais entrainement plus long (changer e en 0.5)
+    ai1 = AI("1", 0.9, 0.001) # -> forte mais entrainement plus long (changer e en 0.5 pour être aleatoire au moment du jeux)
     ai2 = AI("2", 0.9, 0.01) # -> forte entrainement bon 
     ai3 = AI("3", 0.9, 0.05) # -> nul entrainement que contre random
     random_player = Player("4")
@@ -89,3 +89,4 @@ if __name__ == "__main__":
     
     ai1.upload("1")
     ai2.upload("2")
+    ai3.upload("3")
