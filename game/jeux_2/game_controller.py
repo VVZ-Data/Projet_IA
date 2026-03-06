@@ -59,6 +59,7 @@ class GameController:
         if not success:
             # Mouvement interdit → flash rouge dans la vue
             self.view.flash_invalid_move()
+            self.model.player_turn = 3 - self.model.player_turn
         else:
             self._refresh_view()
             # Vérifier si la partie vient de se terminer

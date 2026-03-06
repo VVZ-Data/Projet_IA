@@ -161,9 +161,6 @@ class GameModel:
         if not self.is_valid_move(self.player_turn, direction):
             return False
 
-        # Sauvegarder l'état avant de jouer (pour le undo)
-        self.history.append(self.get_state())
-
         dr, dc = self.DIRECTIONS[direction]
         row, col = self.player_pos[self.player_turn]
         new_row, new_col = row + dr, col + dc
