@@ -299,20 +299,9 @@ class GameModel:
         return [d for d in self.DIRECTIONS if self.is_valid_move(player, d)]
 
     # ──────────────────────────────────────────────
-    # Undo & reset
+    # reset
     # ──────────────────────────────────────────────
 
-    def undo(self) -> bool:
-        """
-        Annule le dernier déplacement (bouton "Undo").
-
-        Returns:
-            True si l'annulation a réussi, False si l'historique est vide.
-        """
-        if not self.history:
-            return False
-        self._restore_state(self.history.pop())
-        return True
 
     def reset(self) -> None:
         """Réinitialise complètement la partie."""

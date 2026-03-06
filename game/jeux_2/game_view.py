@@ -186,18 +186,6 @@ class GameView(tk.Tk):
         ctrl_frame = tk.Frame(self, bg=self.COLOR_BG)
         ctrl_frame.pack(pady=8)
 
-        # ── Bouton Undo (retour en arrière) ───────────────────────────
-        self.undo_btn = tk.Button(
-            ctrl_frame,
-            text="↩  Undo",
-            font=("Helvetica", 11, "bold"),
-            bg=self.COLOR_BTN_UNDO, fg="white",
-            padx=18, pady=6,
-            relief=tk.FLAT, cursor="hand2",
-            activebackground="#C0392B", activeforeground="white",
-            command=self.controller.handle_undo
-        )
-        self.undo_btn.pack(side=tk.LEFT, padx=8)
 
         # ── Bouton New Game ────────────────────────────────────────────
         self.new_game_btn = tk.Button(
@@ -352,12 +340,7 @@ class GameView(tk.Tk):
         self.canvas.config(bg="#E74C3C")
         self.after(160, lambda: self.canvas.config(bg=original_bg))
 
-    def show_no_undo(self) -> None:
-        """Informe l'utilisateur qu'il n'y a rien à annuler."""
-        self.status_lbl.config(text="  Nothing to undo!")
-        self.after(1500, lambda: self.status_lbl.config(
-            text="  Use arrow keys or buttons to move  |  Ctrl+Z or U to undo"
-        ))
+
 
     def show_game_over(self, winner_name: Optional[str]) -> None:
         """

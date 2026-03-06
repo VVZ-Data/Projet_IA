@@ -70,17 +70,7 @@ class GameController:
                 # Décaler légèrement pour laisser le dessin se finaliser
                 self.view.after(200, lambda: self.view.show_game_over(winner_name))
 
-    def handle_undo(self) -> None:
-        """
-        Traite une demande d'annulation du dernier coup (bouton Undo).
 
-        Si l'historique est vide, informe l'utilisateur via la Vue.
-        """
-        success = self.model.undo()
-        if success:
-            self._refresh_view()
-        else:
-            self.view.show_no_undo()
 
     def handle_new_game(self) -> None:
         """Réinitialise le modèle et rafraîchit la vue pour une nouvelle partie."""
