@@ -1,5 +1,6 @@
-from game.jeux_1.main import main as m
+from game.jeux_1.main import main as a
+from game.jeux_2.main import main as c
 
 
 if __name__ == "__main__":
-    m()
+    c()

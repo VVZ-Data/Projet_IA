@@ -3,8 +3,8 @@ Contrôleur du jeu Cubee.
 Fait le lien entre GameModel (logique métier) et GameView (interface graphique).
 """
 
-from game_model import GameModel
-from game_view import GameView
+from .game_model import GameModel
+from .game_view import GameView
 
 
 class GameController:
