@@ -3,4 +3,8 @@ from game.jeux_2.main import main as c
 
 
 if __name__ == "__main__":
-    c()
+    choice = input()
+    if choice == a:
+        a()
+    else:
+        c()

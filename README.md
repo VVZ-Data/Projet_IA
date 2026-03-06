@@ -63,6 +63,8 @@ python -m venv env
 ---
 
 ### Étape 4 — Activer l'environnement virtuel
+    si erreur lancer dans le powerShell
+        Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned # enléve la securiter anti-scripts pour l'utilisateur 
 
 ```bash
 # Windows
