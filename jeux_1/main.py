@@ -41,7 +41,7 @@ def main() -> None:
         #training(ai3, random_player, 7000, 1000)
 
         #training(ai2, ai4, 100_000, 10_000)
-        #compare_ai(ai1, ai2)
+        compare_ai(ai1, ai2, ai3)
         #compare_ai(ai1, ai3)
     
         ai1.upload("1")

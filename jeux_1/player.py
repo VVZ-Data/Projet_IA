@@ -147,7 +147,7 @@ class AI(Player):
 
         for action in range(1, max_take + 1):
             new_state = state - action
-            value = self.value_function.get(new_state, self.value_function.get("win", -1))
+            value = self.value_function.get(new_state, 0)
             if value < best_value:
                 best_value = value
                 best_action = action
@@ -235,7 +235,7 @@ class AI(Player):
             value_s = self.value_function.get(s, 0)
             value_s_prime = self.value_function.get(s_prime, 0)
 
-            self.value_function[s] = value_s + self.learning_rate * (- value_s_prime - value_s)
+            self.value_function[s] = value_s + self.learning_rate * (value_s_prime - value_s)
         self.history.clear()
 
 
