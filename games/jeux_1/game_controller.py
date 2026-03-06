@@ -5,7 +5,8 @@ Fait le lien entre le modèle (logique) et la vue (interface).
 
 from player import Player, Human
 from game_model import GameModel
-from language_manager import lang_manager
+
+from ..language_manager import lang_manager
 
 
 class GameController:
