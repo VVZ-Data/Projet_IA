@@ -1,9 +1,9 @@
 """
 Module contenant la classe GameController — contrôleur MVC du jeu des allumettes.
 """
-from player import Player, Human
-from game_model import GameModel
-from game_view import GameView
+from .player import Player, Human
+from .game_model import GameModel
+from .game_view import GameView
 
 
 class GameController:

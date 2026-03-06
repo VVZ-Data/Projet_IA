@@ -31,3 +31,6 @@ Thumbs.db
 dist/
 build/
 *.egg-info/
+
+# .json
+.json

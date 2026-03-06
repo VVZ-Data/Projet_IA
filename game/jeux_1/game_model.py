@@ -3,7 +3,7 @@ Module contenant la classe GameModel représentant la logique du jeu des allumet
 """
 import random
 from typing import Optional
-from player import Player, Human
+from .player import Player, Human
 
 
 class GameModel:
