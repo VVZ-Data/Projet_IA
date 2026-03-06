@@ -3,14 +3,14 @@ Point d'entrée principal de l'application.
 """
 
 import tkinter as tk
-from player import Player, Human, AI
-from game_model import GameModel
-from game_controller import GameController
+from .player import Player, Human, AI
+from .game_model import GameModel
+from .game_controller import GameController
 from views.home_view import HomeView
-from views.matchstick_menu_view import MatchstickMenuView
-from views.game_view import GameView
-from views.training_view import TrainingView
-#from language_manager import lang_manager
+from .views.matchstick_menu_view import MatchstickMenuView
+from .views.game_view import GameView
+from .views.training_view import TrainingView
+from language_manager import lang_manager
 
 
 class MainApplication(tk.Tk):
@@ -120,7 +120,11 @@ class MainApplication(tk.Tk):
             on_save_callback=lambda: student.upload(save_name)
         )
 
-
-if __name__ == "__main__":
+def main():
     app = MainApplication()
     app.mainloop()
+
+if __name__ == "__main__":
+    main()
+
+
