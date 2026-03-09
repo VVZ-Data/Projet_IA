@@ -23,7 +23,7 @@ class HomeView(Frame):
     """
     
     # Constantes de style pour une interface moderne
-    BG_COLOR = "#F5F7FA"  # Gris très clair pour le fond
+    BG_COLOR = "#92B6EB"  # Gris très clair pour le fond
     CARD_BG = "#FFFFFF"  # Blanc pour les cartes
     CARD_DISABLED = "#E8EDF2"  # Gris pour les cartes désactivées
     PRIMARY_COLOR = "#3498DB"  # Bleu pour les éléments actifs
