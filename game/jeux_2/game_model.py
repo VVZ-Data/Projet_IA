@@ -7,6 +7,9 @@ import copy
 from collections import deque
 from typing import Dict, List, Optional, Tuple
 
+from .game_dto import GameStateDTO
+from .player import Player
+
 
 class GameModel:
     """
@@ -44,6 +47,12 @@ class GameModel:
         """
         self.size: int = size
         self.player_names: Dict[int, str] = {1: player1_name, 2: player2_name}
+
+        # Objets joueurs (référencés dans l'UML)
+        self.current_player: Optional[Player] = None
+        self.winner: Optional[Player] = None
+        self.loser: Optional[Player] = None
+
         # Historique des états pour le bouton "Undo"
         self.history: List[dict] = []
         self._initialize_game()
@@ -55,6 +64,7 @@ class GameModel:
     def _initialize_game(self) -> None:
         """
         Initialise (ou réinitialise) le plateau et les positions de départ.
+
         Joueur 1 → coin supérieur gauche  (0, 0)
         Joueur 2 → coin inférieur droit   (size-1, size-1)
         """
@@ -73,6 +83,8 @@ class GameModel:
 
         # Le joueur 1 commence
         self.player_turn: int = 1
+        self.winner = None
+        self.loser  = None
         # Vider l'historique
         self.history = []
 
@@ -103,6 +115,29 @@ class GameModel:
         self.board       = copy.deepcopy(state["board"])
         self.player_pos  = copy.deepcopy(state["player_pos"])
         self.player_turn = state["player_turn"]
+
+    def get_state_dto(self) -> GameStateDTO:
+        """
+        Construit et retourne un DTO représentant l'état courant complet.
+
+        Fournit un instantané sérialisable utilisable par le contrôleur
+        ou la vue sans accès direct aux attributs internes du modèle.
+
+        Returns:
+            Instance de GameStateDTO décrivant la partie à cet instant.
+        """
+        scores = self.get_scores()
+        return GameStateDTO(
+            size=self.size,
+            board=copy.deepcopy(self.board),
+            turn=self.player_turn,
+            pos_p1=self.player_pos[1],
+            pos_p2=self.player_pos[2],
+            scores=scores,
+            player_names=dict(self.player_names),
+            is_game_over=self.is_game_over(),
+            winner=self.get_winner(),
+        )
 
     # ──────────────────────────────────────────────
     # Validation & déplacement
@@ -142,6 +177,55 @@ class GameModel:
 
         return True
 
+    def legal_move(self) -> List[str]:
+        """
+        Retourne la liste des déplacements valides pour le joueur courant.
+
+        Alias lisible de get_valid_moves() destiné à être appelé
+        directement depuis le contrôleur ou la vue.
+
+        Returns:
+            Liste des directions autorisées (ex. ['up', 'right']).
+        """
+        return self.get_valid_moves(self.player_turn)
+
+    def legal_cell(self, cell: Tuple[int, int]) -> bool:
+        """
+        Indique si une case donnée est accessible pour le joueur courant.
+
+        Une case est légale si elle est adjacente à la position courante
+        et que le déplacement correspondant est valide.
+
+        Args:
+            cell: Coordonnées (ligne, colonne) de la case cible.
+
+        Returns:
+            True si le joueur courant peut se déplacer sur cette case.
+        """
+        row, col = self.player_pos[self.player_turn]
+        target_row, target_col = cell
+
+        for direction, (dr, dc) in self.DIRECTIONS.items():
+            if row + dr == target_row and col + dc == target_col:
+                return self.is_valid_move(self.player_turn, direction)
+        return False
+
+    def step(self, move: str) -> bool:
+        """
+        Effectue un pas de jeu : déplace le joueur courant puis vérifie
+        les enclos créés.
+
+        Alias sémantique de move() pour clarifier l'intention dans les
+        contextes d'IA ou de simulation.
+
+        Args:
+            move: Direction du déplacement ('up','down','left','right').
+
+        Returns:
+            True si le pas a été effectué, False si le déplacement est illégal.
+        """
+        return self.move(move)
+
     def move(self, direction: str) -> bool:
         """
         Effectue le déplacement du joueur courant dans la direction donnée.
@@ -176,6 +260,20 @@ class GameModel:
         self.player_turn = 3 - self.player_turn
 
         return True
+
+    # ──────────────────────────────────────────────
+    # Gestion des tours
+    # ──────────────────────────────────────────────
+
+    def next_player(self) -> int:
+        """
+        Retourne le numéro de l'adversaire du joueur courant, sans changer
+        l'état de la partie.
+
+        Returns:
+            Numéro du joueur suivant (1 ou 2).
+        """
+        return 3 - self.player_turn
 
     # ──────────────────────────────────────────────
     # Détection d'enclos (BFS)
@@ -285,20 +383,19 @@ class GameModel:
 
     def get_valid_moves(self, player: int) -> List[str]:
         """
-        Retourne la liste des déplacements valides pour un joueur.
+        Retourne la liste des déplacements valides pour un joueur donné.
 
         Args:
-            player: Numéro du joueur.
+            player: Numéro du joueur (1 ou 2).
 
         Returns:
-            Liste des directions autorisées.
+            Liste des directions autorisées (sous-ensemble de DIRECTIONS).
         """
         return [d for d in self.DIRECTIONS if self.is_valid_move(player, d)]
 
     # ──────────────────────────────────────────────
-    # reset
+    # Réinitialisation
     # ──────────────────────────────────────────────
-
 
     def reset(self) -> None:
         """Réinitialise complètement la partie."""

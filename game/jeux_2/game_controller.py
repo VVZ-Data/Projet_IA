@@ -3,8 +3,12 @@ Contrôleur du jeu Cubee.
 Fait le lien entre GameModel (logique métier) et GameView (interface graphique).
 """
 
+from typing import Optional
+
+from .game_dto import GameStateDTO
 from .game_model import GameModel
 from .game_view import GameView
+from .player import Player, Human
 
 
 class GameController:
@@ -13,81 +17,175 @@ class GameController:
 
     Reçoit les actions de l'utilisateur depuis la Vue,
     délègue la logique au Modèle, puis rafraîchit la Vue.
-    Il ne contient ni logique de jeu, ni code d'affichage.
+
+    Si le joueur courant est un Player (IA), son coup est déclenché
+    automatiquement. Si c'est un Human, on attend l'input clavier/bouton.
     """
 
     def __init__(
         self,
-        player1_name: str = "Player 1",
-        player2_name: str = "Player 2",
+        player1: Player,
+        player2: Player,
         size: int = 5
     ) -> None:
         """
         Initialise le contrôleur, le modèle et la vue.
 
         Args:
-            player1_name: Nom du joueur 1 (par défaut "Player 1").
-            player2_name: Nom du joueur 2 (par défaut "Player 2").
-            size:         Taille du plateau (par défaut 5).
+            player1: Joueur 1 — instance de Player (IA) ou Human.
+            player2: Joueur 2 — instance de Player (IA) ou Human.
+            size:    Taille du plateau (par défaut 5).
+
+        Example:
+            # Humain vs IA
+            GameController(Human("Alice"), Player("Bot")).run()
+
+            # IA vs IA
+            GameController(Player("Bot 1"), Player("Bot 2")).run()
+
+            # Humain vs Humain
+            GameController(Human("Alice"), Human("Bob")).run()
         """
-        self.model = GameModel(player1_name, player2_name, size)
-        self.view  = GameView(self)
-        # Premier affichage
+        self.players = {1: player1, 2: player2}
+        self.model = GameModel(player1.name, player2.name, size)
+
+        # Lier chaque joueur au modèle pour que play() fonctionne
+        player1.game = self.model
+        player2.game = self.model
+
+        self.view = GameView(self)
         self._refresh_view()
 
+        # Déclencher l'IA si le premier joueur n'est pas humain
+        self._maybe_ia_move()
+
     # ──────────────────────────────────────────────────────────────────────────
-    # Gestionnaires d'actions (appelés par la Vue)
+    # Démarrage & réinitialisation
     # ──────────────────────────────────────────────────────────────────────────
 
-    def handle_move(self, direction: str) -> None:
-        """
-        Traite une demande de déplacement du joueur courant.
-
-        Si la partie est terminée, ignore l'action.
-        Si le déplacement est invalide, déclenche un feedback visuel.
-        Sinon, effectue le coup et vérifie la fin de partie.
-
-        Args:
-            direction: Direction souhaitée ('up','down','left','right').
-        """
-        # Ignorer les actions si la partie est finie
-        if self.model.is_game_over():
-            return
-
-        success = self.model.move(direction)
-
-        if not success:
-            # Mouvement interdit → flash rouge dans la vue
-            self.view.flash_invalid_move()
-            self.model.player_turn = 3 - self.model.player_turn
-        else:
-            self._refresh_view()
-            # Vérifier si la partie vient de se terminer
-            if self.model.is_game_over():
-                winner = self.model.get_winner()
-                winner_name = (
-                    self.model.player_names[winner] if winner else None
-                )
-                # Décaler légèrement pour laisser le dessin se finaliser
-                self.view.after(200, lambda: self.view.show_game_over(winner_name))
-
-
+    def start(self) -> None:
+        """Démarre une nouvelle partie et lance la boucle Tkinter."""
+        self.model.reset()
+        self._refresh_view()
+        self.run()
 
     def handle_new_game(self) -> None:
         """Réinitialise le modèle et rafraîchit la vue pour une nouvelle partie."""
         self.model.reset()
         self._refresh_view()
+        self._maybe_ia_move()
 
     # ──────────────────────────────────────────────────────────────────────────
-    # Rafraîchissement de la Vue
+    # Gestionnaires d'actions
     # ──────────────────────────────────────────────────────────────────────────
+
+    def handle_move(self, direction: str) -> None:
+        """
+        Traite un déplacement manuel (clavier/bouton).
+
+        Ignoré si le joueur courant est une IA ou si la partie est finie.
+
+        Args:
+            direction: Direction souhaitée ('up','down','left','right').
+        """
+        if self.model.is_game_over():
+            return
+
+        current = self.players[self.model.player_turn]
+        if not current.is_human():
+            return  # Ce n'est pas le tour d'un humain
+
+        success = self.model.move(direction)
+        if not success:
+            self.view.flash_invalid_move()
+        else:
+            self._refresh_view()
+            if self.model.is_game_over():
+                self.view.after(200, self.handle_end_game)
+            else:
+                # Vérifier si le joueur suivant est une IA
+                self._maybe_ia_move()
+
+    def handle_ia_move(self) -> None:
+        """
+        Joue automatiquement le coup du joueur courant (IA).
+
+        Appelé par _maybe_ia_move() avec un délai via view.after().
+        Enchaîne sur le joueur suivant s'il est aussi une IA.
+        """
+        if self.model.is_game_over():
+            return
+
+        current = self.players[self.model.player_turn]
+        if current.is_human():
+            return  # Sécurité : ne pas jouer à la place d'un humain
+
+        success = current.play()
+        if not success:
+            self.handle_end_game()
+            return
+
+        self._refresh_view()
+
+        if self.model.is_game_over():
+            self.view.after(200, self.handle_end_game)
+        else:
+            self._maybe_ia_move()
+
+    def handle_end_game(self) -> None:
+        """Gère la fin de partie et affiche le résultat."""
+        winner_id = self.model.get_winner()
+        winner_name: Optional[str] = (
+            self.model.player_names[winner_id] if winner_id else None
+        )
+        self.view.show_game_over(winner_name)
+
+    def handle_undo(self) -> None:
+        """
+        Annule le dernier coup joué.
+
+        Sans effet si l'historique est vide.
+        """
+        if not self.model.history:
+            return
+        state = self.model.history.pop()
+        self.model._restore_state(state)
+        self._refresh_view()
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Informations d'état
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def get_status_message(self) -> str:
+        """Retourne le message de statut courant de la partie."""
+        if self.model.is_game_over():
+            winner_id = self.model.get_winner()
+            if winner_id:
+                return f"Partie terminée — {self.model.player_names[winner_id]} a gagné !"
+            return "Partie terminée — Égalité !"
+        current_name = self.model.player_names[self.model.player_turn]
+        return f"Tour de {current_name}."
+
+    def get_state_dto(self) -> GameStateDTO:
+        """Retourne un DTO décrivant l'état courant complet de la partie."""
+        return self.model.get_state_dto()
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Interne
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _maybe_ia_move(self) -> None:
+        """
+        Déclenche le coup de l'IA avec un délai si le joueur courant n'est pas humain.
+
+        Utilise view.after() pour ne pas bloquer la boucle Tkinter.
+        """
+        current = self.players[self.model.player_turn]
+        if not current.is_human():
+            self.view.after(400, self.handle_ia_move)
 
     def _refresh_view(self) -> None:
-        """
-        Synchronise la Vue avec l'état courant du Modèle.
-
-        Met à jour le plateau et les scores.
-        """
+        """Synchronise la Vue avec l'état courant du Modèle."""
         self.view.update_board(
             self.model.board,
             self.model.player_pos,
@@ -100,7 +198,7 @@ class GameController:
         )
 
     # ──────────────────────────────────────────────────────────────────────────
-    # Lancement de l'application
+    # Lancement
     # ──────────────────────────────────────────────────────────────────────────
 
     def run(self) -> None:

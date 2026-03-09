@@ -98,8 +98,5 @@ def testing(ai, random_player, nb_games):
 
     print(f"{wins/nb_games*100:.2f}%")
 
-if __name__ == "__main__":
-    
-    main()
 
 

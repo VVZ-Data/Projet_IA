@@ -13,7 +13,7 @@ class GameView(tk.Tk):
     Interface graphique Tkinter du jeu Cubee.
 
     Affiche le plateau (Canvas), les scores, l'indicateur de tour,
-    les boutons de contrôle (Undo, New Game) et les flèches directionnelles.
+    les boutons de contrôle (New Game) et les flèches directionnelles.
     Toutes les interactions utilisateur sont déléguées au contrôleur.
     """
 
@@ -28,13 +28,12 @@ class GameView(tk.Tk):
     COLOR_P2_CURRENT  = "#0077B6"   # Bleu foncé — position courante J2
     COLOR_TEXT        = "#EAEAEA"   # Texte clair
     COLOR_SUBTEXT     = "#7F8C8D"   # Texte secondaire
-    COLOR_BTN_UNDO    = "#E74C3C"   # Rouge — bouton Undo
     COLOR_BTN_NEW     = "#2ECC71"   # Vert  — bouton New Game
     COLOR_BTN_ARROW   = "#2C3E50"   # Gris foncé — flèches de direction
 
     # ── Dimensions ───────────────────────────────────────────────────────────
-    CELL_SIZE    = 80  # Taille d'une case en pixels
-    CELL_PADDING = 3   # Espacement entre les cases
+    CELL_SIZE    = 80   # Taille d'une case en pixels
+    CELL_PADDING = 3    # Espacement entre les cases
     EMOJI_P1     = "😊"
     EMOJI_P2     = "😞"
 
@@ -88,8 +87,7 @@ class GameView(tk.Tk):
         score_bar.pack(padx=20, fill=tk.X)
 
         # Score Joueur 1
-        self.p1_panel = tk.Frame(score_bar, bg=self.COLOR_P1,
-                                  padx=20, pady=8)
+        self.p1_panel = tk.Frame(score_bar, bg=self.COLOR_P1, padx=20, pady=8)
         self.p1_panel.pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(0, 5))
 
         self.p1_name_lbl = tk.Label(
@@ -115,8 +113,7 @@ class GameView(tk.Tk):
         self.turn_indicator.pack(side=tk.LEFT, padx=10)
 
         # Score Joueur 2
-        self.p2_panel = tk.Frame(score_bar, bg=self.COLOR_P2,
-                                  padx=20, pady=8)
+        self.p2_panel = tk.Frame(score_bar, bg=self.COLOR_P2, padx=20, pady=8)
         self.p2_panel.pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(5, 0))
 
         self.p2_name_lbl = tk.Label(
@@ -138,7 +135,6 @@ class GameView(tk.Tk):
         board_frame = tk.Frame(self, bg=self.COLOR_GRID, bd=2, relief=tk.RIDGE)
         board_frame.pack(padx=20, pady=15)
 
-        # Taille initiale pour un plateau 5x5 (sera recalculée à l'affichage)
         initial_size = 5 * self.CELL_SIZE + 2 * self.CELL_PADDING
 
         self.canvas = tk.Canvas(
@@ -153,6 +149,7 @@ class GameView(tk.Tk):
     def _build_arrow_pad(self) -> None:
         """
         Crée le pavé directionnel (↑ ← ↓ →) pour jouer sans clavier.
+
         Pratique pour les démos ou les plateformes sans raccourcis clavier.
         """
         pad_frame = tk.Frame(self, bg=self.COLOR_BG)
@@ -165,13 +162,11 @@ class GameView(tk.Tk):
             activebackground="#3D5A80", activeforeground="white"
         )
 
-        # Ligne du haut : flèche ↑
         top_row = tk.Frame(pad_frame, bg=self.COLOR_BG)
         top_row.pack()
         tk.Button(top_row, text="↑", **btn_cfg,
                   command=lambda: self.controller.handle_move("up")).pack(padx=2, pady=2)
 
-        # Ligne du milieu : ← ↓ →
         mid_row = tk.Frame(pad_frame, bg=self.COLOR_BG)
         mid_row.pack()
         tk.Button(mid_row, text="←", **btn_cfg,
@@ -182,12 +177,10 @@ class GameView(tk.Tk):
                   command=lambda: self.controller.handle_move("right")).pack(side=tk.LEFT, padx=2, pady=2)
 
     def _build_control_buttons(self) -> None:
-        """Crée les boutons Undo et New Game."""
+        """Crée les boutons de contrôle de la partie (New Game)."""
         ctrl_frame = tk.Frame(self, bg=self.COLOR_BG)
         ctrl_frame.pack(pady=8)
 
-
-        # ── Bouton New Game ────────────────────────────────────────────
         self.new_game_btn = tk.Button(
             ctrl_frame,
             text="🔄  New Game",
@@ -204,7 +197,7 @@ class GameView(tk.Tk):
         """Crée la barre de statut en bas de la fenêtre."""
         self.status_lbl = tk.Label(
             self,
-            text="Use arrow keys or buttons to move  |  Ctrl+Z or Undo to cancel last move",
+            text="Utilisez les flèches du clavier ou les boutons pour vous déplacer.",
             font=("Helvetica", 8),
             bg=self.COLOR_BG, fg=self.COLOR_SUBTEXT
         )
@@ -223,7 +216,6 @@ class GameView(tk.Tk):
         self.bind("<Control-z>", lambda _e: self.controller.handle_undo())
         self.bind("<u>",         lambda _e: self.controller.handle_undo())
         self.bind("<n>",         lambda _e: self.controller.handle_new_game())
-        # Forcer le focus sur la fenêtre pour capturer les touches
         self.focus_set()
 
     # ──────────────────────────────────────────────────────────────────────────
@@ -257,7 +249,6 @@ class GameView(tk.Tk):
 
         for row in range(size):
             for col in range(size):
-                # Coordonnées pixel de la case
                 x1 = col * self.CELL_SIZE + self.CELL_PADDING
                 y1 = row * self.CELL_SIZE + self.CELL_PADDING
                 x2 = x1 + self.CELL_SIZE - self.CELL_PADDING
@@ -265,7 +256,6 @@ class GameView(tk.Tk):
                 cx = (x1 + x2) // 2
                 cy = (y1 + y2) // 2
 
-                # Couleur de fond selon l'appartenance
                 cell_val = board[row][col]
                 if (row, col) == p1_pos:
                     color = self.COLOR_P1_CURRENT
@@ -278,13 +268,11 @@ class GameView(tk.Tk):
                 else:
                     color = self.COLOR_EMPTY
 
-                # Dessiner la case (arrondie visuellement via padding)
                 self.canvas.create_rectangle(
                     x1, y1, x2, y2,
                     fill=color, outline="#AAAAAA", width=1
                 )
 
-                # Afficher l'emoji du joueur sur sa position courante
                 if (row, col) == p1_pos:
                     self.canvas.create_text(
                         cx, cy, text=self.EMOJI_P1,
@@ -308,39 +296,63 @@ class GameView(tk.Tk):
         Args:
             scores:       Dictionnaire {joueur: score}.
             player_turn:  Numéro du joueur actif.
-            player_names: Noms des joueurs.
+            player_names: Noms des joueurs {numéro: nom}.
         """
         self.p1_score_lbl.config(text=str(scores[1]))
         self.p2_score_lbl.config(text=str(scores[2]))
         self.p1_name_lbl.config(text=player_names[1])
         self.p2_name_lbl.config(text=player_names[2])
 
-        # Mettre en évidence le panneau du joueur actif
         if player_turn == 1:
             self.turn_indicator.config(text="◀", fg=self.COLOR_P1)
             self.p1_panel.config(relief=tk.RAISED, bd=3)
             self.p2_panel.config(relief=tk.FLAT,   bd=0)
             self.status_lbl.config(
-                text=f"  {player_names[1]}'s turn — use arrow keys or buttons"
+                text=f"  Tour de {player_names[1]} — utilisez les flèches ou les boutons."
             )
         else:
             self.turn_indicator.config(text="▶", fg=self.COLOR_P2)
             self.p1_panel.config(relief=tk.FLAT,   bd=0)
             self.p2_panel.config(relief=tk.RAISED, bd=3)
             self.status_lbl.config(
-                text=f"  {player_names[2]}'s turn — use arrow keys or buttons"
+                text=f"  Tour de {player_names[2]} — utilisez les flèches ou les boutons."
             )
 
     def flash_invalid_move(self) -> None:
         """
         Feedback visuel (flash rouge) quand un déplacement est interdit.
-        Évite une popup bloquante.
+
+        Évite une popup bloquante en faisant clignoter brièvement le canvas.
         """
         original_bg = self.canvas.cget("bg")
         self.canvas.config(bg="#E74C3C")
         self.after(160, lambda: self.canvas.config(bg=original_bg))
 
+    def reset(self) -> None:
+        """
+        Réinitialise l'affichage de la vue pour une nouvelle partie.
 
+        Remet la barre de statut à son message par défaut et efface
+        toute mise en évidence résiduelle des panneaux de score.
+        Délègue le rechargement du plateau au contrôleur via handle_new_game().
+        """
+        self.status_lbl.config(
+            text="Utilisez les flèches du clavier ou les boutons pour vous déplacer."
+        )
+        self.p1_panel.config(relief=tk.FLAT, bd=0)
+        self.p2_panel.config(relief=tk.FLAT, bd=0)
+
+    def end_game(self, winner_name: Optional[str]) -> None:
+        """
+        Affiche l'écran de fin de partie (alias explicite de show_game_over).
+
+        Nommé end_game() conformément à l'UML pour que le contrôleur
+        puisse l'appeler sans connaître le nom interne show_game_over().
+
+        Args:
+            winner_name: Nom du gagnant, ou None en cas d'égalité.
+        """
+        self.show_game_over(winner_name)
 
     def show_game_over(self, winner_name: Optional[str]) -> None:
         """
@@ -350,11 +362,11 @@ class GameView(tk.Tk):
             winner_name: Nom du gagnant, ou None si égalité.
         """
         if winner_name:
-            message = f"🏆  {winner_name} wins!\n\nWould you like to play again?"
+            message = f"🏆  {winner_name} gagne !\n\nVoulez-vous rejouer ?"
         else:
-            message = "🤝  It's a tie!\n\nWould you like to play again?"
+            message = "🤝  Égalité !\n\nVoulez-vous rejouer ?"
 
-        if messagebox.askyesno("Game Over", message):
+        if messagebox.askyesno("Fin de partie", message):
             self.controller.handle_new_game()
 
     # ──────────────────────────────────────────────────────────────────────────

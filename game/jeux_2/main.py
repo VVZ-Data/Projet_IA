@@ -1,7 +1,8 @@
+from .player import Player, Human
 from .game_controller import GameController
 
 def main():
-    GameController(player1_name="Player 1", player2_name="Player 2", size=5).run()
-
-if __name__ == "__main__":
-    main()
+    player_1 = Human("Ethan")
+    player_2 = Player("Adrien")
+    
+    GameController(player_1, player_2, size=5).run()
