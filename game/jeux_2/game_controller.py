@@ -47,7 +47,7 @@ class GameController:
             GameController(Human("Alice"), Human("Bob")).run()
         """
         self.players = {1: player1, 2: player2}
-        self.model = GameModel(player1.name, player2.name, size)
+        self.model = GameModel(player1, player2, size)
 
         # Lier chaque joueur au modèle pour que play() fonctionne
         player1.game = self.model
@@ -65,12 +65,14 @@ class GameController:
 
     def start(self) -> None:
         """Démarre une nouvelle partie et lance la boucle Tkinter."""
+        self.model.shuffle()
         self.model.reset()
         self._refresh_view()
         self.run()
 
     def handle_new_game(self) -> None:
         """Réinitialise le modèle et rafraîchit la vue pour une nouvelle partie."""
+        self.model.shuffle()
         self.model.reset()
         self._refresh_view()
         self._maybe_ia_move()
@@ -134,23 +136,13 @@ class GameController:
 
     def handle_end_game(self) -> None:
         """Gère la fin de partie et affiche le résultat."""
+        self.model.end_game()
         winner_id = self.model.get_winner()
         winner_name: Optional[str] = (
-            self.model.player_names[winner_id] if winner_id else None
+            self.model.players[winner_id] if winner_id else None
         )
         self.view.show_game_over(winner_name)
 
-    def handle_undo(self) -> None:
-        """
-        Annule le dernier coup joué.
-
-        Sans effet si l'historique est vide.
-        """
-        if not self.model.history:
-            return
-        state = self.model.history.pop()
-        self.model._restore_state(state)
-        self._refresh_view()
 
     # ──────────────────────────────────────────────────────────────────────────
     # Informations d'état
@@ -188,13 +180,13 @@ class GameController:
         """Synchronise la Vue avec l'état courant du Modèle."""
         self.view.update_board(
             self.model.board,
-            self.model.player_pos,
+            self.model.player_position,
             self.model.size
         )
         self.view.update_scores(
             self.model.get_scores(),
             self.model.player_turn,
-            self.model.player_names
+            self.model.players
         )
 
     # ──────────────────────────────────────────────────────────────────────────

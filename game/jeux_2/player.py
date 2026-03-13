@@ -23,6 +23,7 @@ class Player:
         self.name: str = name
         self.game = game
         self.position: Optional[Tuple[int, int]] = None # (ligne, colonne)
+        self.type = "bot"
 
         #statistique partie
         self.nb_wins: int = 0
@@ -61,13 +62,8 @@ class Player:
 
     def is_human(self) -> bool:
         """Retourne False — ce joueur est une IA."""
-        return False
+        return self.type == "human"
 
-    def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}(name={self.name!r}, pos={self.pos}, "
-            f"wins={self.nb_wins}, loses={self.nb_loses}, draws={self.nb_draws})"
-        )
 
 
 class Human(Player):
@@ -77,6 +73,9 @@ class Human(Player):
     Surcharge play() pour ne rien faire : c'est le contrôleur qui attend
     l'input clavier/bouton et appelle handle_move() à la place.
     """
+    def __init__(self, name: str, game=None):
+        super().__init__(name, game)
+        self.type = "human"
 
     def play(self) -> bool:
         """
@@ -87,7 +86,4 @@ class Human(Player):
         """
         return False
 
-    def is_human(self) -> bool:
-        """Retourne True — ce joueur est humain."""
-        return True
     

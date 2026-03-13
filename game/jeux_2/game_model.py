@@ -1,22 +1,22 @@
 """
 Modèle du jeu Cubee.
-Contient toute la logique métier : plateau, mouvements, enclos, scores.
+Contient toute la logique métier : plateau, mouvements, enew_columnlos, scores.
 """
-
+import random
 import copy
 from collections import deque
 from typing import Dict, List, Optional, Tuple
 
 from .game_dto import GameStateDTO
-from .player import Player
+from .player import Player, Human
 
 
 class GameModel:
     """
-    Modèle principal du jeu Cubee.
+    Modèle prinew_columnipal du jeu Cubee.
 
     Gère l'état complet du jeu : plateau, positions des joueurs,
-    tours, scores, détection d'enclos (via BFS) et historique (undo).
+    tours, scores, détection d'enew_columnlos (via BFS) et historique (undo).
 
     Le plateau est représenté par une matrice :
         0 = case vide
@@ -36,7 +36,7 @@ class GameModel:
         "right": ( 0,  1),
     }
 
-    def __init__(self, player1_name: str, player2_name: str, size: int = 5) -> None:
+    def __init__(self, player1: Player, player2: Player, size: int = 5) -> None:
         """
         Initialise un nouveau modèle de jeu.
 
@@ -46,15 +46,13 @@ class GameModel:
             size: Taille du plateau (carré size x size). Par défaut 5.
         """
         self.size: int = size
-        self.player_names: Dict[int, str] = {1: player1_name, 2: player2_name}
+        self.players: Dict[int, Player] = {1: player1, 2: player2}
 
-        # Objets joueurs (référencés dans l'UML)
+        # Objets joueurs 
         self.current_player: Optional[Player] = None
         self.winner: Optional[Player] = None
         self.loser: Optional[Player] = None
 
-        # Historique des états pour le bouton "Undo"
-        self.history: List[dict] = []
         self._initialize_game()
 
     # ──────────────────────────────────────────────
@@ -73,7 +71,7 @@ class GameModel:
             [self.EMPTY] * self.size for _ in range(self.size)
         ]
         # Positions initiales des joueurs
-        self.player_pos: Dict[int, Tuple[int, int]] = {
+        self.player_position: Dict[int, Tuple[int, int]] = {
             1: (0, 0),
             2: (self.size - 1, self.size - 1),
         }
@@ -81,7 +79,7 @@ class GameModel:
         self.board[0][0] = self.PLAYER1
         self.board[self.size - 1][self.size - 1] = self.PLAYER2
 
-        # Le joueur 1 commence
+        # Le joueur 1 commenew_columne
         self.player_turn: int = 1
         self.winner = None
         self.loser  = None
@@ -101,7 +99,7 @@ class GameModel:
         """
         return {
             "board":       copy.deepcopy(self.board),
-            "player_pos":  copy.deepcopy(self.player_pos),
+            "player_pos":  copy.deepcopy(self.player_position),
             "player_turn": self.player_turn,
         }
 
@@ -113,7 +111,7 @@ class GameModel:
             state: Dictionnaire produit par get_state().
         """
         self.board       = copy.deepcopy(state["board"])
-        self.player_pos  = copy.deepcopy(state["player_pos"])
+        self.player_position  = copy.deepcopy(state["player_pos"])
         self.player_turn = state["player_turn"]
 
     def get_state_dto(self) -> GameStateDTO:
@@ -124,15 +122,15 @@ class GameModel:
         ou la vue sans accès direct aux attributs internes du modèle.
 
         Returns:
-            Instance de GameStateDTO décrivant la partie à cet instant.
+            Instanew_columne de GameStateDTO décrivant la partie à cet instant.
         """
         scores = self.get_scores()
         return GameStateDTO(
             size=self.size,
             board=copy.deepcopy(self.board),
             turn=self.player_turn,
-            pos_p1=self.player_pos[1],
-            pos_p2=self.player_pos[2],
+            pos_p1=self.player_position[1],
+            pos_p2=self.player_position[2],
             scores=scores,
             player_names=dict(self.player_names),
             is_game_over=self.is_game_over(),
@@ -148,7 +146,7 @@ class GameModel:
         Vérifie si un déplacement est légal pour un joueur donné.
 
         Un déplacement est invalide si :
-        - la direction est inconnue,
+        - la direction est inew_columnonnue,
         - la destination sort du plateau,
         - la destination appartient à l'adversaire.
 
@@ -162,9 +160,9 @@ class GameModel:
         if direction not in self.DIRECTIONS:
             return False
 
-        dr, dc = self.DIRECTIONS[direction]
-        row, col = self.player_pos[player]
-        new_row, new_col = row + dr, col + dc
+        direction_row, direction_column = self.DIRECTIONS[direction]
+        row, col = self.player_position[player]
+        new_row, new_col = row + direction_row, col + direction_column
 
         # Vérifier les bornes du plateau
         if not (0 <= new_row < self.size and 0 <= new_col < self.size):
@@ -202,18 +200,19 @@ class GameModel:
         Returns:
             True si le joueur courant peut se déplacer sur cette case.
         """
-        row, col = self.player_pos[self.player_turn]
+        row, col = self.player_position[self.player_turn]
         target_row, target_col = cell
 
-        for direction, (dr, dc) in self.DIRECTIONS.items():
-            if row + dr == target_row and col + dc == target_col:
+        for direction, (direction_row, direction_column) in self.DIRECTIONS.items():
+            if row + direction_row == target_row and col + direction_column == target_col:
                 return self.is_valid_move(self.player_turn, direction)
+            
         return False
 
     def step(self, move: str) -> bool:
         """
         Effectue un pas de jeu : déplace le joueur courant puis vérifie
-        les enclos créés.
+        les enew_columnlos créés.
 
         Alias sémantique de move() pour clarifier l'intention dans les
         contextes d'IA ou de simulation.
@@ -233,7 +232,7 @@ class GameModel:
         Si le déplacement est valide :
           1. Sauvegarde l'état dans l'historique (undo).
           2. Met à jour la position et colore la case.
-          3. Détecte et capture les éventuels enclos.
+          3. Détecte et capture les éventuels enew_columnlos.
           4. Passe la main à l'adversaire.
 
         Args:
@@ -245,43 +244,47 @@ class GameModel:
         if not self.is_valid_move(self.player_turn, direction):
             return False
 
-        dr, dc = self.DIRECTIONS[direction]
-        row, col = self.player_pos[self.player_turn]
-        new_row, new_col = row + dr, col + dc
+        direction_row, direction_column = self.DIRECTIONS[direction]
+
+        row, col = self.player_position[self.player_turn]
+        new_row, new_col = row + direction_row, col + direction_column
 
         # Déplacer et colorier la case
-        self.player_pos[self.player_turn] = (new_row, new_col)
+        self.player_position[self.player_turn] = (new_row, new_col)
         self.board[new_row][new_col] = self.player_turn
 
-        # Vérifier les enclos créés par ce déplacement
-        self.check_enclosure()
+        # Vérifier les enew_columnlos créés par ce déplacement
+        self.check_enew_columnlosure()
 
         # Changer de joueur
-        self.player_turn = 3 - self.player_turn
+        self.next_player()
 
         return True
 
     # ──────────────────────────────────────────────
     # Gestion des tours
     # ──────────────────────────────────────────────
+    def shuffle(self):
+        """
+        Mélange les joueurs
+        """
+        if random.random() < 0.5:
+            self.players[1], self.players[2] = self.players[2], self.player[1]
+        self.current_player = 1
 
     def next_player(self) -> int:
         """
-        Retourne le numéro de l'adversaire du joueur courant, sans changer
-        l'état de la partie.
-
-        Returns:
-            Numéro du joueur suivant (1 ou 2).
+        change de joueurs courant
         """
-        return 3 - self.player_turn
+        self.current_player = 3 - self.player_turn
 
     # ──────────────────────────────────────────────
-    # Détection d'enclos (BFS)
+    # Détection d'enew_columnlos (BFS)
     # ──────────────────────────────────────────────
 
-    def check_enclosure(self) -> None:
+    def check_enew_columnlosure(self) -> None:
         """
-        Détecte et capture les enclos après un déplacement.
+        Détecte et capture les enew_columnlos après un déplacement.
 
         Algorithme BFS depuis la position de l'adversaire :
         toutes les cases vides atteignables par l'adversaire sont marquées.
@@ -292,7 +295,7 @@ class GameModel:
         current_player = self.player_turn
         opponent       = 3 - current_player
 
-        opp_row, opp_col = self.player_pos[opponent]
+        opponent_row, opponent_column = self.player_position[opponent]
 
         # Grille booléenne : case atteignable par l'adversaire ?
         reachable: List[List[bool]] = [
@@ -301,29 +304,29 @@ class GameModel:
 
         # BFS — file FIFO initialisée à la position de l'adversaire
         queue: deque = deque()
-        reachable[opp_row][opp_col] = True
-        queue.append((opp_row, opp_col))
+        reachable[opponent_row][opponent_column] = True
+        queue.append((opponent_row, opponent_column))
 
         while queue:
-            r, c = queue.popleft()
+            row, column = queue.popleft()
 
-            for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                nr, nc = r + dr, c + dc
+            for direction_row, direction_column in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                new_row, new_column = row + direction_row, column + direction_column
 
-                # Case valide, non encore visitée, libre OU appartenant à l'adversaire
-                if (0 <= nr < self.size and
-                        0 <= nc < self.size and
-                        not reachable[nr][nc] and
-                        self.board[nr][nc] in (self.EMPTY, opponent)):
+                # Case valide, non enew_columnore visitée, libre OU appartenant à l'adversaire
+                if (0 <= new_row < self.size and
+                        0 <= new_column < self.size and
+                        not reachable[new_row][new_column] and
+                        self.board[new_row][new_column] in (self.EMPTY, opponent)):
 
-                    reachable[nr][nc] = True
-                    queue.append((nr, nc))
+                    reachable[new_row][new_column] = True
+                    queue.append((new_row, new_column))
 
-        # Capturer toutes les cases vides non atteignables → enclos du joueur courant
-        for r in range(self.size):
-            for c in range(self.size):
-                if self.board[r][c] == self.EMPTY and not reachable[r][c]:
-                    self.board[r][c] = current_player
+        # Capturer toutes les cases vides non atteignables → enew_columnlos du joueur courant
+        for row in range(self.size):
+            for column in range(self.size):
+                if self.board[row][column] == self.EMPTY and not reachable[row][column]:
+                    self.board[row][column] = current_player
 
     # ──────────────────────────────────────────────
     # Scores & fin de partie
@@ -336,7 +339,7 @@ class GameModel:
         Returns:
             Dictionnaire {joueur: score}.
         """
-        scores: Dict[int, int] = {1: 0, 2: 0}
+        scores: Dict[int, int] = {1 : 0, 2 : 0}
         for row in self.board:
             for cell in row:
                 if cell in scores:
@@ -391,7 +394,22 @@ class GameModel:
         Returns:
             Liste des directions autorisées (sous-ensemble de DIRECTIONS).
         """
-        return [d for d in self.DIRECTIONS if self.is_valid_move(player, d)]
+        return [direction for direction in self.DIRECTIONS if self.is_valid_move(player, direction)]
+    
+    def end_game(self):
+        winner_indice = self.get_winner()
+
+
+        if winner_indice is not None:
+            loser_indice = 3 - winner_indice
+
+            self.players[winner_indice].win()
+            self.players[loser_indice].lose()
+        else:
+            for player in self.players:
+                player.draw()
+
+
 
     # ──────────────────────────────────────────────
     # Réinitialisation
