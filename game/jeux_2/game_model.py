@@ -230,10 +230,9 @@ class GameModel:
         Effectue le déplacement du joueur courant dans la direction donnée.
 
         Si le déplacement est valide :
-          1. Sauvegarde l'état dans l'historique (undo).
-          2. Met à jour la position et colore la case.
-          3. Détecte et capture les éventuels enew_columnlos.
-          4. Passe la main à l'adversaire.
+          1. Met à jour la position et colore la case.
+          2. Détecte et capture les éventuels enew_columnlos.
+          3. Passe la main à l'adversaire.
 
         Args:
             direction: Direction du déplacement.
@@ -254,7 +253,7 @@ class GameModel:
         self.board[new_row][new_col] = self.player_turn
 
         # Vérifier les enew_columnlos créés par ce déplacement
-        self.check_enew_columnlosure()
+        self.check_new_closure()
 
         # Changer de joueur
         self.next_player()
@@ -276,12 +275,12 @@ class GameModel:
         self.player_turn = 3 - self.player_turn
 
     # ──────────────────────────────────────────────
-    # Détection d'enew_columnlos (BFS)
+    # Détection de new_closure (BFS)
     # ──────────────────────────────────────────────
 
-    def check_enew_columnlosure(self) -> None:
+    def check_new_closure(self) -> None:
         """
-        Détecte et capture les enew_columnlos après un déplacement.
+        Détecte et capture les cellules après un déplacement.
 
         Algorithme BFS depuis la position de l'adversaire :
         toutes les cases vides atteignables par l'adversaire sont marquées.
@@ -310,7 +309,7 @@ class GameModel:
             for direction_row, direction_column in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                 new_row, new_column = row + direction_row, column + direction_column
 
-                # Case valide, non enew_columnore visitée, libre OU appartenant à l'adversaire
+                # Case valide, non new_closure visitée, libre OU appartenant à l'adversaire
                 if (0 <= new_row < self.size and
                         0 <= new_column < self.size and
                         not reachable[new_row][new_column] and
@@ -319,7 +318,7 @@ class GameModel:
                     reachable[new_row][new_column] = True
                     queue.append((new_row, new_column))
 
-        # Capturer toutes les cases vides non atteignables → enew_columnlos du joueur courant
+        # Capturer toutes les cases vides non atteignables → new_closure du joueur courant
         for row in range(self.size):
             for column in range(self.size):
                 if self.board[row][column] == self.EMPTY and not reachable[row][column]:
