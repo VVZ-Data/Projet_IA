@@ -129,10 +129,10 @@ class GameModel:
             size=self.size,
             board=copy.deepcopy(self.board),
             turn=self.player_turn,
-            pos_p1=self.player_position[1],
-            pos_p2=self.player_position[2],
+            position_player1=self.player_position[1],
+            position_player2=self.player_position[2],
+            player_names={key: player.name for key, player in self.players.items()},
             scores=scores,
-            player_names=dict(self.player_names),
             is_game_over=self.is_game_over(),
             winner=self.get_winner(),
         )
@@ -265,18 +265,15 @@ class GameModel:
     # Gestion des tours
     # ──────────────────────────────────────────────
     def shuffle(self):
-        """
-        Mélange les joueurs
-        """
         if random.random() < 0.5:
-            self.players[1], self.players[2] = self.players[2], self.player[1]
-        self.current_player = 1
+            self.players[1], self.players[2] = self.players[2], self.players[1]  
+
 
     def next_player(self) -> int:
         """
         change de joueurs courant
         """
-        self.current_player = 3 - self.player_turn
+        self.player_turn = 3 - self.player_turn
 
     # ──────────────────────────────────────────────
     # Détection d'enew_columnlos (BFS)
@@ -406,7 +403,7 @@ class GameModel:
             self.players[winner_indice].win()
             self.players[loser_indice].lose()
         else:
-            for player in self.players:
+            for player in self.players.value():
                 player.draw()
 
 

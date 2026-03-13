@@ -288,7 +288,7 @@ class GameView(tk.Tk):
         self,
         scores: Dict[int, int],
         player_turn: int,
-        players: Dict[int, object]
+        player_names: Dict[int, str]
     ) -> None:
         """
         Met à jour les scores, les noms et l'indicateur de tour.
@@ -300,22 +300,22 @@ class GameView(tk.Tk):
         """
         self.p1_score_lbl.config(text=str(scores[1]))
         self.p2_score_lbl.config(text=str(scores[2]))
-        self.p1_name_lbl.config(text=players[1].name)
-        self.p2_name_lbl.config(text=players[2].name)
+        self.p1_name_lbl.config(text=player_names[1])
+        self.p2_name_lbl.config(text=player_names[2])
 
         if player_turn == 1:
             self.turn_indicator.config(text="◀", fg=self.COLOR_P1)
             self.p1_panel.config(relief=tk.RAISED, bd=3)
             self.p2_panel.config(relief=tk.FLAT,   bd=0)
             self.status_lbl.config(
-                text=f"  Tour de {players[1].name} — utilisez les flèches ou les boutons."
+                text=f"  Tour de {player_names[1]} — utilisez les flèches ou les boutons."
             )
         else:
             self.turn_indicator.config(text="▶", fg=self.COLOR_P2)
             self.p1_panel.config(relief=tk.FLAT,   bd=0)
             self.p2_panel.config(relief=tk.RAISED, bd=3)
             self.status_lbl.config(
-                text=f"  Tour de {players[2].name} — utilisez les flèches ou les boutons."
+                text=f"  Tour de {player_names[2]} — utilisez les flèches ou les boutons."
             )
 
     def flash_invalid_move(self) -> None:

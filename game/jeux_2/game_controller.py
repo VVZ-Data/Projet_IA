@@ -93,13 +93,16 @@ class GameController:
         if self.model.is_game_over():
             return
 
-        current = self.players[self.model.player_turn]
+        current = self.model.players[self.model.player_turn]
         if not current.is_human():
             return  # Ce n'est pas le tour d'un humain
 
         success = self.model.move(direction)
         if not success:
             self.view.flash_invalid_move()
+            self.model.next_player()
+            self._refresh_view()
+            self._maybe_ia_move()
         else:
             self._refresh_view()
             if self.model.is_game_over():
@@ -117,8 +120,8 @@ class GameController:
         """
         if self.model.is_game_over():
             return
-
-        current = self.players[self.model.player_turn]
+        
+        current = self.model.players[self.model.player_turn]
         if current.is_human():
             return  # Sécurité : ne pas jouer à la place d'un humain
 
@@ -139,7 +142,7 @@ class GameController:
         self.model.end_game()
         winner_id = self.model.get_winner()
         winner_name: Optional[str] = (
-            self.model.players[winner_id] if winner_id else None
+            self.model.players[winner_id].name if winner_id else None
         )
         self.view.show_game_over(winner_name)
 
@@ -153,9 +156,9 @@ class GameController:
         if self.model.is_game_over():
             winner_id = self.model.get_winner()
             if winner_id:
-                return f"Partie terminée — {self.model.player_names[winner_id]} a gagné !"
+                return f"Partie terminée — {self.model.players[winner_id].name} a gagné !"
             return "Partie terminée — Égalité !"
-        current_name = self.model.player_names[self.model.player_turn]
+        current_name = self.model.players[self.model.player_turn].name
         return f"Tour de {current_name}."
 
     def get_state_dto(self) -> GameStateDTO:
@@ -172,21 +175,23 @@ class GameController:
 
         Utilise view.after() pour ne pas bloquer la boucle Tkinter.
         """
-        current = self.players[self.model.player_turn]
+        current = self.model.players[self.model.player_turn]
         if not current.is_human():
             self.view.after(400, self.handle_ia_move)
 
     def _refresh_view(self) -> None:
         """Synchronise la Vue avec l'état courant du Modèle."""
+        dto = self.model.get_state_dto()
+        players_positions = {1: (dto.position_player1), 2: (dto.position_player2)}
         self.view.update_board(
-            self.model.board,
-            self.model.player_position,
-            self.model.size
+            dto.board,
+            players_positions,
+            dto.size
         )
         self.view.update_scores(
-            self.model.get_scores(),
-            self.model.player_turn,
-            self.model.players
+            dto.scores,
+            dto.turn,
+            dto.player_names
         )
 
     # ──────────────────────────────────────────────────────────────────────────

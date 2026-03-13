@@ -26,8 +26,8 @@ class GameStateDTO:
         turn:         Numéro du joueur dont c'est le tour (1 ou 2).
         pos_p1:       Position (ligne, colonne) du joueur 1.
         pos_p2:       Position (ligne, colonne) du joueur 2.
+        player_name:  Dictionaire {numéro: nom} 
         scores:       Dictionnaire {numéro_joueur: score}.
-        player_names: Dictionnaire {numéro_joueur: nom}.
         is_game_over: True si la partie est terminée.
         winner:       Numéro du gagnant (1 ou 2), ou None si égalité / en cours.
     """
@@ -35,12 +35,10 @@ class GameStateDTO:
     size: int
     board: List[List[int]]
     turn: int
-    pos_p1: Tuple[int, int]
-    pos_p2: Tuple[int, int]
+    position_player1: Tuple[int, int]
+    position_player2: Tuple[int, int]
+    player_names: Dict[int, str] = field(default_factory=lambda: {1 : "Player1", 2 : "Player2"})
     scores: Dict[int, int] = field(default_factory=lambda: {1: 0, 2: 0})
-    player_names: Dict[int, str] = field(
-        default_factory=lambda: {1: "Player 1", 2: "Player 2"}
-    )
     is_game_over: bool = False
     winner: Optional[int] = None
 
@@ -57,8 +55,8 @@ class GameStateDTO:
                 "size": 3,
                 "board": "110002002",
                 "turn": 4,
-                "pos_p1": [0, 1],
-                "pos_p2": [1, 2],
+                "position_player1": (0, 1),
+                "position_player2": (1, 2),
                 ...
             }
         """
@@ -67,10 +65,10 @@ class GameStateDTO:
             # Plateau aplati en chaîne pour la sérialisation compacte
             "board":        "".join(str(cell) for row in self.board for cell in row),
             "turn":         self.turn,
-            "pos_p1":       list(self.pos_p1),
-            "pos_p2":       list(self.pos_p2),
+            "position_player1":       list(self.posistion_player1),
+            "position_player2":       list(self.posistion_player2),
+            "player_names": {str(k): v for k, v in self.player_name.items()},
             "scores":       {str(k): v for k, v in self.scores.items()},
-            "player_names": {str(k): v for k, v in self.player_names.items()},
             "is_game_over": self.is_game_over,
             "winner":       self.winner,
         }
@@ -89,17 +87,17 @@ class GameStateDTO:
         size = data["size"]
         flat = data["board"]
         board = [
-            [int(flat[r * size + c]) for c in range(size)]
-            for r in range(size)
+            [int(flat[row * size + column]) for column in range(size)]
+            for row in range(size)
         ]
         return cls(
             size=size,
             board=board,
             turn=data["turn"],
-            pos_p1=tuple(data["pos_p1"]),
-            pos_p2=tuple(data["pos_p2"]),
+            position_player1=tuple(data["position_player1"]),
+            position_player2=tuple(data["position_player2"]),
+            player_names={int(k): p for k, p in data["player_names"].items()},
             scores={int(k): v for k, v in data["scores"].items()},
-            player_names={int(k): v for k, v in data["player_names"].items()},
             is_game_over=data.get("is_game_over", False),
             winner=data.get("winner"),
         )

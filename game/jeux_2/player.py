@@ -55,13 +55,19 @@ class Player:
         """
         if self.game is None:
             return False
+        
+        # bot qui ne fait que des choix valide
         valid_moves = self.game.legal_move()
         if not valid_moves:
             return False
         return self.game.move(random.choice(valid_moves))
+    
+        # Bot aléatoire qui peut se tromper (coups valides ET invalides)
+        # all_moves = list(self.game.DIRECTIONS.keys())
+        # return self.game.move(random.choice(all_moves))
 
     def is_human(self) -> bool:
-        """Retourne False — ce joueur est une IA."""
+        """Retourne False ou True en fonction du type de joueurs."""
         return self.type == "human"
 
 
@@ -76,14 +82,4 @@ class Human(Player):
     def __init__(self, name: str, game=None):
         super().__init__(name, game)
         self.type = "human"
-
-    def play(self) -> bool:
-        """
-        Ne fait rien — le coup est déclenché par l'input humain via la vue.
-
-        Returns:
-            False (aucun coup automatique).
-        """
-        return False
-
     
