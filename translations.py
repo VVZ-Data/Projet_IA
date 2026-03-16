@@ -10,8 +10,16 @@ TRANSLATIONS = {
         # Page d'accueil
         "title": "Game Collection",
         "matchstick_game": "Matchstick Game",
+        "cubee_game": "Cubee",
+        "pixelKart_game": "Pixel Kart",
         "coming_soon": "Coming Soon",
         "select_game": "Select a game to play",
+
+        # Menu cubee
+        "menu_title": "Cubee - menu",
+
+        # Menu pixelKart
+        "menu_title": "Pixel Kart",
         
         # Menu du jeu des allumettes
         "menu_title": "Matchstick Game - Menu",
@@ -62,6 +70,12 @@ TRANSLATIONS = {
         "matchstick_game": "Jeu des Allumettes",
         "coming_soon": "Bientôt Disponible",
         "select_game": "Sélectionnez un jeu pour jouer",
+
+        # Menu cubee
+        "menu_title": "Cubee - menu",
+
+        # Menu pixelKart
+        "menu_title": "Pixel Kart",
         
         # Menu du jeu des allumettes
         "menu_title": "Jeu des Allumettes - Menu",
