@@ -1,90 +1,119 @@
-# 🎮 Matchstick Game — Jeu des Allumettes
+# 🎮 Matchstick Game — Projet de Conception IA
 
-Jeu des allumettes développé en Python avec interface graphique Tkinter, dans le cadre du cours **IN252 - Projet de conception IA** (HENaLLux).
-
----
-
-## 📋 Description
-
-Le jeu des allumettes se joue à deux. Au départ, un certain nombre d'allumettes sont posées sur la table. Chaque joueur retire à son tour 1, 2 ou 3 allumettes. **Le joueur qui prend la dernière allumette perd.**
-
-### Types de joueurs disponibles
-- **Human** : joueur humain interagissant via l'interface graphique
-- **Player (Random)** : joueur aléatoire choisissant 1, 2 ou 3 allumettes au hasard
+> Jeu des Allumettes (variante Misère du Jeu de Nim) avec agents d'Intelligence Artificielle à apprentissage autonome.  
+> Développé dans le cadre du cursus **IN252** à l'**HENaLLux**.
 
 ---
 
-## 🏗️ Architecture MVC
+## 📋 Table des Matières
+
+- [Description du Jeu](#-description-du-jeu)
+- [Fonctionnalités Clés](#-fonctionnalités-clés)
+- [Architecture Logicielle (MVC)](#-architecture-logicielle-mvc)
+- [Intelligence Artificielle & Apprentissage](#-intelligence-artificielle--apprentissage)
+- [Guide d'Installation & Lancement](#-guide-dinstallation--lancement)
+- [Manuel d'Utilisation](#-manuel-dutilisation)
+- [Qualité du Code & Standards](#-qualité-du-code--standards)
+- [Auteurs & Crédits](#-auteurs--crédits)
+
+---
+
+## 📖 Description du Jeu
+
+Le jeu des allumettes est un **jeu de duel mathématique symétrique** :
+
+| Étape | Description |
+|-------|-------------|
+| **Initialisation** | Un nombre défini d'allumettes est disposé sur le plateau. |
+| **Déroulement** | Chaque joueur retire, à tour de rôle, **1, 2 ou 3 allumettes**. |
+| **Victoire** | Variante **Misère** : le joueur qui retire la **dernière allumette perd**. |
+
+---
+
+## ✨ Fonctionnalités Clés
+
+### 🌍 Système Multilingue Dynamique
+Bascule instantanée entre **Français** et **Anglais** sans redémarrage, via un gestionnaire d'états centralisé.
+
+### 🎮 Modes de Jeu Versatiles
+- **Humain vs IA** — Testez vos capacités contre un modèle entraîné.
+- **Humain vs Random** — Mode détente contre un algorithme stochastique.
+- **IA vs IA** — Observez deux agents s'affronter pour valider la convergence des stratégies.
+
+### 🤖 Laboratoire d'Entraînement
+- Configuration granulaire des hyperparamètres (**Epsilon**, **Learning Rate**).
+- Entraînement dissocié des agents (IA 1 ou IA 2).
+- Monitoring en temps réel via barre de progression et statistiques de performance.
+- Système de **sauvegarde persistante (JSON)** pour conserver les modèles les plus performants.
+
+---
+
+## 🏗️ Architecture Logicielle (MVC)
+
+Le projet adopte une **séparation stricte des préoccupations** grâce au patron Modèle-Vue-Contrôleur.
 
 ```
-matchstick_game/
-├── main.py               # Point d'entrée
-├── player.py             # Classes Player et Human (Modèle)
-├── game_model.py         # Classe GameModel — logique du jeu (Modèle)
-├── game_view.py          # Classe GameView — interface Tkinter (Vue)
-├── game_controller.py    # Classe GameController — lien Modèle/Vue (Contrôleur)
-├── requirements.txt      # Dépendances Python
-├── .gitignore            # Fichiers ignorés par Git
-└── README.md             # Ce fichier
+Projet_IA/
+├── main.py
+├── game_model.py        # Modèle — état du jeu & règles métier
+├── player.py            # Modèle — comportements de décision (Random, Q-Learning)
+├── game_controller.py   # Contrôleur — médiateur Vue ↔ Modèle
+├── views/
+│   ├── home_view.py     # Hub de navigation principal
+│   ├── game_view.py     # Rendu graphique Canvas des allumettes
+│   └── training_view.py # Dashboard de contrôle de l'apprentissage
+├── AI_save_1.json       # Sauvegarde persistante agent 1
+├── AI_save_2.json       # Sauvegarde persistante agent 2
+└── requirements.txt
 ```
+
+### 1. Le Modèle (`game_model.py`, `player.py`)
+Encapsule l'état du système et les règles métier.
+- **`GameModel`** — Gère le stock d'allumettes et la validation des coups.
+- **`Player` & `AI`** — Définissent les comportements de décision, de l'aléatoire simple au Q-Learning complexe.
+
+### 2. La Vue (`views/`)
+Modules Tkinter indépendants pour une interface moderne et réactive.
+- **`home_view.py`** — Hub de navigation principal.
+- **`game_view.py`** — Rendu graphique dynamique des allumettes sur Canvas.
+- **`training_view.py`** — Dashboard de contrôle de l'apprentissage.
+
+### 3. Le Contrôleur (`game_controller.py`)
+Agit comme **médiateur**, interceptant les événements utilisateurs de la Vue pour mettre à jour le Modèle.
 
 ---
 
-## ⚙️ Installation
+## 🤖 Intelligence Artificielle & Apprentissage
+
+L'agent intelligent repose sur l'algorithme de **Q-Learning** (Reinforcement Learning).
+
+| Composant | Description |
+|-----------|-------------|
+| **V-Function** | Dictionnaire associant chaque état (nb d'allumettes) à une valeur de récompense attendue. |
+| **Politique ε-Greedy** | Alternance entre **Exploration** (coups aléatoires) et **Exploitation** (meilleures connaissances). |
+| **Apprentissage TD** | Valeurs mises à jour après chaque action en fonction du résultat (victoire / défaite). |
+| **Epsilon Decay** | Réduction progressive du taux d'exploration pour stabiliser la stratégie optimale. |
+
+---
+
+## ⚙️ Guide d'Installation & Lancement
 
 ### Prérequis
-- Python 3.8 ou supérieur → https://www.python.org/downloads/
-- `tkinter` est inclus automatiquement avec Python
+- **Python 3.8+**
+- `tkinter` (inclus par défaut dans la plupart des distributions Python)
 
----
-
-### Étape 1 — Télécharger le projet
-
-1. Aller sur **https://github.com/VVZ-Data/Projet_IA**
-2. Cliquer sur le bouton vert **"Code"**
-3. Cliquer sur **"Download ZIP"**
-4. **Extraire** le fichier ZIP téléchargé dans le dossier de votre choix
-
----
-
-### Étape 2 — Ouvrir un terminal dans le dossier extrait
-
-- **Windows** : ouvrir le dossier extrait → cliquer dans la barre d'adresse de l'explorateur → taper `cmd` → Entrée
-- **ou** : clic droit dans le dossier → *"Ouvrir dans le terminal"*
-
----
-
-### Étape 3 — Créer l'environnement virtuel
+### Installation
 
 ```bash
-python -m venv env
-```
+# 1. Clonage du dépôt
+git clone https://github.com/VVZ-Data/Projet_IA.git
+cd Projet_IA
 
----
-
-### Étape 4 — Activer l'environnement virtuel
-
-```bash
-# Windows
-env\Scripts\activate
-
-# Unix / macOS
-source env/bin/activate
-```
-
-> Vous devriez voir `(env)` apparaître au début de votre ligne de commande.
-
----
-
-### Étape 5 — Installer les dépendances
-
-```bash
+# 2. Installation des dépendances de développement
 pip install -r requirements.txt
 ```
 
----
-
-### Étape 6 — Lancer le jeu
+### Lancement
 
 ```bash
 python main.py
@@ -92,34 +121,48 @@ python main.py
 
 ---
 
-## 🎲 Règles du jeu
+## 🎲 Manuel d'Utilisation
 
-1. La partie commence avec 15 allumettes.
-2. Les joueurs sont mélangés aléatoirement au début de chaque partie.
-3. À son tour, un joueur clique sur **Take 1**, **Take 2** ou **Take 3**.
-4. Le joueur qui prend la **dernière allumette perd**.
-5. Cliquez sur **Play Again** pour recommencer.
+### Navigation
+1. **Accueil** — Sélectionnez *"Jeu des Allumettes"*. Utilisez le bouton **EN/FR** pour changer la langue.
+2. **Menu** — Choisissez entre *"Jouer"* (immédiat) ou *"Entraîner"* (configuration).
 
----
+### Sessions d'Entraînement
 
-## 🧹 Qualité du code
+Pour obtenir une IA imbattable, suivez ces recommandations :
 
-Le code respecte :
-- **PEP 8** (style Python standard)
-- **Clean Code** : fonctions courtes, noms explicites
-- **Type Hinting** sur toutes les fonctions
-- **Docstrings** complètes sur toutes les classes et méthodes
-- **Architecture MVC** stricte
+| Paramètre | Valeur recommandée | Raison |
+|-----------|-------------------|--------|
+| **Nombre de parties** | ≥ 100 000 | Convergence assurée |
+| **Learning Rate** | `0.3` | Équilibre vitesse / stabilité |
+| **Epsilon Decay** | `5000` | Exploration suffisante en début d'entraînement |
 
----
-
-## 👥 Auteurs
-
-- **[Victor Van Zieleghem]**
-- **[Ethan Nickels]**
+> **💾 Sauvegarde** — Les résultats ne sont persistés dans `AI_save_1` ou `AI_save_2` que sur **validation manuelle** après analyse des résultats.
 
 ---
 
-## 📄 Licence
+## 🧹 Qualité du Code & Standards
 
-Projet académique — HENaLLux 2025-2026
+| Standard | Détail |
+|----------|--------|
+| ✅ **Architecture MVC** | Découplage total logique / interface. |
+| ✅ **Pattern Singleton** | Gestion unique du `LanguageManager`. |
+| ✅ **Pattern Observer** | Notification automatique des changements de langue à toutes les vues actives. |
+| ✅ **Type Hinting** | Utilisation systématique des indices de type pour une meilleure robustesse. |
+| ✅ **Conformité PEP 8** | Code clair, nommé explicitement et documenté via Docstrings. |
+
+---
+
+## 👥 Auteurs & Crédits
+
+| Nom | GitHub |
+|-----|--------|
+| **Victor Van Zieghem** | [@VVZ-Data](https://github.com/VVZ-Data) |
+| **Ethan Nickels** | [@Etrix425](https://github.com/Etrix425) |
+
+**Institution** : HENaLLux (B3 Info)  
+**Année Académique** : 2025–2026
+
+---
+
+> *Ce projet est réalisé à des fins pédagogiques. Tous droits réservés.*
