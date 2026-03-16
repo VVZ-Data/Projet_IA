@@ -11,10 +11,17 @@ def main():
         GameController(player_1, player_2, size=5).run()
     else:
         player_1 = AI("jean", 0.05, 0.9)
-        player_2 = AI("Adrien")
+        player_2 = Player("Adrien")
 
-        training(player_1, player_2, 100_000, 100)
+        training(player_1, player_2, 10_000, 10)
 
+
+
+        compare_ai(player_1)
+
+        player_1.epsilon = 0
+
+        testing(player_1, player_2, 1000)
         compare_ai(player_1)
 
 def compare_ai(*ais):
@@ -32,6 +39,7 @@ def compare_ai(*ais):
     print(stats1)
     print(stats2)
     print(ai.epsilon)
+    print(ai.q_table["win"])
     print(f"{'-'*4}{'-'*len(ais)*15}")     
 
 
@@ -47,3 +55,13 @@ def training(ai1, ai2, nb_games, nb_epsilon):
         training_game.play()
 
         training_game.reset()
+def testing(ai, random_player, nb_games):
+    test_game = GameModel(ai, random_player, displayable=False)
+    wins = 0
+    for i in range(nb_games):
+        test_game.play()
+        if test_game.get_winner() == ai:
+            wins +=1 
+        test_game.reset()
+
+    print(f"{wins/nb_games*100:.2f}%")
