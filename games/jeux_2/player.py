@@ -89,7 +89,32 @@ class AI(Player):
         super().__init__(name, game)
         self.learning_rate: float = learning_rate
         self.epsilon: float = epsilon
-        self.q_table: Dict[str, Dict[str, float]] = {}
+        self.q_table: Dict[str, Dict[str, float]] = {"win": {"up": +10,
+                                                             "down": +10,
+                                                             "left": +10,
+                                                             "right": +10},
+                                                     "lose": {"up": -10,
+                                                              "down": -10,
+                                                              "left": -10,
+                                                              "right": -10}}
+        self.last_state = None
+        self.last_action = None
+
+    def win(self):
+        super().win()
+
+        if self.last_state and self.last_action:
+            self.update(10)
+
+        self.last_state = None
+        self.last_action = None
+
+    def lose(self):
+        super().lose()
+
+        if self.last_state and self.last_action:
+            self.update(-10)
+        
         self.last_state = None
         self.last_action = None
 
@@ -112,11 +137,13 @@ class AI(Player):
     
     def play(self):
         """
-        Joue de façon random avec erreur possible en fonction de l'epsilon
+        Joue de façon random avec erreur possible au début de l'entrainement
+        Met à jour la q-table
         """
 
-        state = self.game.get_state_dto()
+        state = self.game.get_state_dto() # état du jeux
         score_before = state.scores[state.turn]
+
         if random.random() < self.epsilon:
             # Bot aléatoire qui peut se tromper (coups valides ET invalides) -> exploration
             all_moves = list(self.game.DIRECTIONS.keys())
@@ -134,8 +161,13 @@ class AI(Player):
             self.update(reward) #calcule q-table 
 
         return success
-
-
+    @property
+    def nb_games(self) -> int:
+        """
+        Retourne le nombre de game
+        """
+        return self.nb_loses + self.nb_draws + self.nb_wins
+    
     def next_epsilon(self, coefficient=0.95, minimum=0.05):
         """
         Réduit progressivement epsilon (décroissance de l’exploration).
@@ -160,12 +192,40 @@ class AI(Player):
         """
         state_key = self._encode_state(state)
         valid_moves = self.game.legal_move()
+
         if not valid_moves:
             return False
-        action = max(valid_moves, key=lambda a: self._get_q(state_key, a))
+        
+        action = max(valid_moves, key=lambda a: self._get_q(state_key, a)) # a = action
+
         self.last_state = state_key
         self.last_action = action
+
         return self.game.move(action)
+    
+    def _get_q(self, state_key, action):
+        """
+        retourne la valeur de Q pour un etat et une action donner
+        """
+        return self.q_table.get(state_key, {}).get(action, 0)
+    
+    def update(self, reward):
+        next_state = self.game.get_state_dto()
+        next_state = self._encode_state(next_state)
+
+        state = self.last_state
+        action = self.last_action
+
+        all_moves = list(self.game.DIRECTIONS.keys())
+        best_q_value = max(self._get_q(next_state, a) for a in all_moves)
+
+        current_q_value = self._get_q(state, action)
+
+        if state not in self.q_table:
+            self.q_table[state] = {}
+
+        self.q_table[state][action] = current_q_value + self.learning_rate * (reward + best_q_value - current_q_value)
+
     
 
     

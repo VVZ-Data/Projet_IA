@@ -65,14 +65,12 @@ class GameController:
 
     def start(self) -> None:
         """Démarre une nouvelle partie et lance la boucle Tkinter."""
-        self.model.shuffle()
         self.model.reset()
         self._refresh_view()
         self.run()
 
     def handle_new_game(self) -> None:
         """Réinitialise le modèle et rafraîchit la vue pour une nouvelle partie."""
-        self.model.shuffle()
         self.model.reset()
         self._refresh_view()
         self._maybe_ia_move()
@@ -98,7 +96,7 @@ class GameController:
             return  # Ce n'est pas le tour d'un humain
 
         success = self.model.move(direction)
-        if not success:
+        if not success: # passe son tour 
             self.view.flash_invalid_move()
             self.model.next_player()
             self._refresh_view()
@@ -127,7 +125,9 @@ class GameController:
 
         success = current.play()
         if not success:
-            self.handle_end_game()
+            self.model.next_player()
+            self._refresh_view()
+            self._maybe_ia_move()
             return
 
         self._refresh_view()

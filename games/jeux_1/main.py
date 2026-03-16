@@ -85,7 +85,8 @@ def compare_ai(*ais):
         print(f"{state:2} :", end='')
         for value in values:
             print(f"{value:^15.3}", end='')
-        print()
+        print()  
+
 
 def testing(ai, random_player, nb_games):
     test_game = GameModel(12, ai, random_player, displayable=False)

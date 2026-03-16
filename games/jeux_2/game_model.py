@@ -16,7 +16,7 @@ class GameModel:
     Modèle prinew_columnipal du jeu Cubee.
 
     Gère l'état complet du jeu : plateau, positions des joueurs,
-    tours, scores, détection d'enew_columnlos (via BFS) et historique (undo).
+    tours, scores, détection d'enclos (via BFS).
 
     Le plateau est représenté par une matrice :
         0 = case vide
@@ -36,7 +36,7 @@ class GameModel:
         "right": ( 0,  1),
     }
 
-    def __init__(self, player1: Player, player2: Player, size: int = 5) -> None:
+    def __init__(self, player1: Player, player2: Player, size: int = 5, displayable = True) -> None:
         """
         Initialise un nouveau modèle de jeu.
 
@@ -44,9 +44,11 @@ class GameModel:
             player1_name: Nom du joueur 1.
             player2_name: Nom du joueur 2.
             size: Taille du plateau (carré size x size). Par défaut 5.
+            displayable : affichage graphique
         """
         self.size: int = size
         self.players: Dict[int, Player] = {1: player1, 2: player2}
+        self.displayable = displayable
 
         # Objets joueurs 
         self.current_player: Optional[Player] = None
@@ -70,6 +72,8 @@ class GameModel:
         self.board: List[List[int]] = [
             [self.EMPTY] * self.size for _ in range(self.size)
         ]
+        # Mélange les joueurs
+        self.shuffle()
         # Positions initiales des joueurs
         self.player_position: Dict[int, Tuple[int, int]] = {
             1: (0, 0),
@@ -87,7 +91,7 @@ class GameModel:
         self.history = []
 
     # ──────────────────────────────────────────────
-    # Sérialisation d'état (pour l'historique undo)
+    # Sérialisation d'état 
     # ──────────────────────────────────────────────
 
     def get_state(self) -> dict:
@@ -110,8 +114,8 @@ class GameModel:
         Args:
             state: Dictionnaire produit par get_state().
         """
-        self.board       = copy.deepcopy(state["board"])
-        self.player_position  = copy.deepcopy(state["player_pos"])
+        self.board = copy.deepcopy(state["board"])
+        self.player_position = copy.deepcopy(state["player_pos"])
         self.player_turn = state["player_turn"]
 
     def get_state_dto(self) -> GameStateDTO:
@@ -122,7 +126,7 @@ class GameModel:
         ou la vue sans accès direct aux attributs internes du modèle.
 
         Returns:
-            Instanew_columne de GameStateDTO décrivant la partie à cet instant.
+            Instané de GameStateDTO décrivant la partie à cet instant.
         """
         scores = self.get_scores()
         return GameStateDTO(
@@ -146,7 +150,7 @@ class GameModel:
         Vérifie si un déplacement est légal pour un joueur donné.
 
         Un déplacement est invalide si :
-        - la direction est inew_columnonnue,
+        - la direction est inconnue,
         - la destination sort du plateau,
         - la destination appartient à l'adversaire.
 
@@ -212,7 +216,7 @@ class GameModel:
     def step(self, move: str) -> bool:
         """
         Effectue un pas de jeu : déplace le joueur courant puis vérifie
-        les enew_columnlos créés.
+        les enclos créés.
 
         Alias sémantique de move() pour clarifier l'intention dans les
         contextes d'IA ou de simulation.
@@ -252,8 +256,8 @@ class GameModel:
         self.player_position[self.player_turn] = (new_row, new_col)
         self.board[new_row][new_col] = self.player_turn
 
-        # Vérifier les enew_columnlos créés par ce déplacement
-        self.check_new_closure()
+        # Vérifier les enclos créés par ce déplacement
+        self.check_enclosure()
 
         # Changer de joueur
         self.next_player()
@@ -275,10 +279,10 @@ class GameModel:
         self.player_turn = 3 - self.player_turn
 
     # ──────────────────────────────────────────────
-    # Détection de new_closure (BFS)
+    # Détection d'enclos (BFS)
     # ──────────────────────────────────────────────
 
-    def check_new_closure(self) -> None:
+    def check_enclosure(self) -> None:
         """
         Détecte et capture les cellules après un déplacement.
 
@@ -289,7 +293,7 @@ class GameModel:
         Complexité : O(size²) dans le pire cas.
         """
         current_player = self.player_turn
-        opponent       = 3 - current_player
+        opponent = 3 - current_player
 
         opponent_row, opponent_column = self.player_position[opponent]
 
@@ -299,26 +303,26 @@ class GameModel:
         ]
 
         # BFS — file FIFO initialisée à la position de l'adversaire
-        queue: deque = deque()
+        queue: deque = deque() # file 
         reachable[opponent_row][opponent_column] = True
         queue.append((opponent_row, opponent_column))
 
         while queue:
-            row, column = queue.popleft()
+            row, column = queue.popleft() #noeud (FIFO -> first in first out)
 
-            for direction_row, direction_column in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            for direction_row, direction_column in self.DIRECTIONS.values():
                 new_row, new_column = row + direction_row, column + direction_column
 
-                # Case valide, non new_closure visitée, libre OU appartenant à l'adversaire
+                # Case valide, non visitée, libre OU appartenant à l'adversaire
                 if (0 <= new_row < self.size and
                         0 <= new_column < self.size and
                         not reachable[new_row][new_column] and
                         self.board[new_row][new_column] in (self.EMPTY, opponent)):
 
                     reachable[new_row][new_column] = True
-                    queue.append((new_row, new_column))
+                    queue.append((new_row, new_column)) #noeud
 
-        # Capturer toutes les cases vides non atteignables → new_closure du joueur courant
+        # Capturer toutes les cases vides non atteignables → enclosure du joueur courant
         for row in range(self.size):
             for column in range(self.size):
                 if self.board[row][column] == self.EMPTY and not reachable[row][column]:
@@ -402,7 +406,7 @@ class GameModel:
             self.players[winner_indice].win()
             self.players[loser_indice].lose()
         else:
-            for player in self.players.value():
+            for player in self.players.values():
                 player.draw()
 
 
@@ -414,3 +418,18 @@ class GameModel:
     def reset(self) -> None:
         """Réinitialise complètement la partie."""
         self._initialize_game()
+
+
+    def play(self) -> None:
+        """Lance une partie complète sans interface graphique."""
+        self.reset()
+
+        self.players[1].game = self
+        self.players[2].game = self
+        
+        while not self.is_game_over():
+            current = self.players[self.player_turn]
+            success = current.play()
+            if not success:
+                self.next_player()  # passer le tour si bloqué
+        self.end_game()
