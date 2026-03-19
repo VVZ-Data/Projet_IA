@@ -5,7 +5,7 @@ from .game_model import GameModel
 def main():
     choice = input("p = play t = train :")
     if choice == 'p':
-        player_1 = AI("Ethan")
+        player_1 = Human("Ethan")
         player_2 = Player("Adrien")
     
         GameController(player_1, player_2, size=5).run()
