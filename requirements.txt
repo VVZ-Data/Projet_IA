@@ -1,6 +1,7 @@
-# Dépendances du projet Matchstick Game
-# tkinter est inclus dans la bibliothèque standard Python 3.x
-# Aucune dépendance externe requise pour la Partie 1 et 2
+# --- Dépendances d'exécution (Production) ---
+# Aucune dépendance externe (utilise la bibliothèque standard Python 3.x)
+# Note: tkinter doit être installé sur le système (ex: sudo apt-get install python3-tk)
 
-# Pour la vérification du style de code
+# --- Outils de développement ---
 pylint>=3.0.0
+# pytest>=7.0.0  (Optionnel, si vous comptez faire des tests unitaires)
