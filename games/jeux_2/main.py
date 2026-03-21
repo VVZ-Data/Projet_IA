@@ -65,3 +65,24 @@ def testing(ai, random_player, nb_games):
         test_game.reset()
 
     print(f"{wins/nb_games*100:.2f}%")
+
+def run_game():
+    """
+    Fonction d'entrée pour lancer le jeu des allumettes.
+    
+    Cette fonction est appelée par le main.py racine quand
+    l'utilisateur sélectionne ce jeu depuis la page d'accueil.
+    
+    Crée et lance l'application Tkinter du jeu.
+    Elle constitue le point d'entrée public de ce module.
+    
+    Example:
+        >>> # Depuis le main racine
+        >>> from games.jeux_1 import main as game1
+        >>> game1.run_game()  # Lance le jeu des allumettes
+    """
+    player1 = AI("jean")
+    player2 = Human("moi")
+    app = GameController(player1, player2)
+    app.mainloop()
+
