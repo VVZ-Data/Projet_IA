@@ -109,10 +109,8 @@ class AI(Player):
         self.learning_rate = learning_rate
         self.history = []
         self.previous_state = None
-        self.value_function = {}
+        self.value_function = {"win": +1, "lose": -1}
 
-        self.value_function["win"] = +1
-        self.value_function["lose"] = -1
 
     def exploit(self):
         vf = self.value_function
