@@ -85,8 +85,9 @@ class AI(Player):
     """
     Joueur IA  — joue de façon automatique au début de l'entrainement
     """
-    def __init__(self, name: str, learning_rate = 0.01, epsilon = 0.9, game=None):
+    def __init__(self, name: str, gama = 0.05, learning_rate = 0.01, epsilon = 0.9, game=None):
         super().__init__(name, game)
+        self.gama = gama 
         self.learning_rate: float = learning_rate
         self.epsilon: float = epsilon
         self.q_table: Dict[str, Dict[str, float]] = {"win": {"up": +10,
@@ -133,7 +134,7 @@ class AI(Player):
         """
         row_player1, column_player1 = state.position_player2
         row_player2, column_player2 = state.position_player1
-        return f"{row_player1}{column_player1}{row_player2}{column_player2}_{state.scores[1]}_{state.scores[2]}_{state.turn}"
+        return f"{row_player1}{column_player1}{row_player2}{column_player2}_{state.scores[1]}_{state.scores[2]}_{state.turn}_{state.board}" # ajouter board
     
     def play(self):
         """
@@ -224,7 +225,7 @@ class AI(Player):
         if state not in self.q_table:
             self.q_table[state] = {}
 
-        self.q_table[state][action] = current_q_value + self.learning_rate * (reward + best_q_value - current_q_value)
+        self.q_table[state][action] = current_q_value + self.learning_rate * (reward + self.gama * best_q_value - current_q_value)
 
     
 

@@ -68,7 +68,7 @@ def testing(ai, random_player, nb_games):
 
 def run_game():
     """
-    Fonction d'entrée pour lancer le jeu des allumettes.
+    Fonction d'entrée pour lancer le jeu cubee.
     
     Cette fonction est appelée par le main.py racine quand
     l'utilisateur sélectionne ce jeu depuis la page d'accueil.
