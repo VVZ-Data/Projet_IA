@@ -68,6 +68,8 @@ TRANSLATIONS = {
         # Page d'accueil
         "title": "Collection de Jeux",
         "matchstick_game": "Jeu des Allumettes",
+        "cubee_game": "Cubee",
+        "pixelKart_game": "Pixel Kart",
         "coming_soon": "Bientôt Disponible",
         "select_game": "Sélectionnez un jeu pour jouer",
 

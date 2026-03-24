@@ -158,7 +158,7 @@ class HomeView(Frame):
         
         # Mettre à jour les cartes
         self.card1.update_text(lang_manager.get_text("matchstick_game"))
-        self.card2.update_text(lang_manager.get_text("coming_soon"))
+        self.card2.update_text(lang_manager.get_text("cubee_game"))
         self.card3.update_text(lang_manager.get_text("coming_soon"))
 
 
