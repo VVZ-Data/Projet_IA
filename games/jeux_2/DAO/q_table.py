@@ -1,9 +1,9 @@
 """
     model db q_table
 """
-from models.base import Base
-from sqlalchemy import Column, Integer, Float, ForeignKey
-from sqlalchemy.orm import relationship
+from base import Base
+from sqlalchemy import Column, Integer, Float, String, Tuple
+
 
 class QTable(Base):
     """
@@ -19,16 +19,10 @@ class QTable(Base):
     __tablename__ = 'q_table'
 
     """Identifiant unique de l'entrée."""
-    id = Column(Integer, primary_key=True)
+    id = Column(Tuple, primary_key=True)
 
-    """Id du joueur IA propriétaire de cette q-table."""
-    players_id = Column(Integer, ForeignKey('player.id'))
-
-    """Position X du cube représentant cet état."""
-    cube_x = Column(Integer) 
-
-    """Position Y du cube représentant cet état."""
-    cube_y = Column(Integer)
+    """Etat"""
+    state = Column(String(1000))
 
     """Valeur Q pour l'action aller en haut depuis cet état."""
     action_up = Column(Float)
@@ -41,6 +35,3 @@ class QTable(Base):
 
     """Valeur Q pour l'action aller à gauche depuis cet état."""
     action_left = Column(Float)
-
-    """Joueur IA associé à cette q-table."""
-    player = relationship("Player", back_populates="q_table", uselist=False)

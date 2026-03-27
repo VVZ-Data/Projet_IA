@@ -133,7 +133,7 @@ class AI(Player):
         """
         row_player1, column_player1 = state.position_player2
         row_player2, column_player2 = state.position_player1
-        return f"{row_player1}{column_player1}{row_player2}{column_player2}_{state.scores[1]}_{state.scores[2]}_{state.turn}"
+        return f"{state.turn}_{row_player1}{column_player1}{row_player2}{column_player2}_{state.scores[1]}_{state.scores[2]}_{state.board}"
     
     def play(self):
         """
