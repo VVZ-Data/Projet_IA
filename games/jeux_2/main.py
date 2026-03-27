@@ -1,6 +1,9 @@
 from .player import Player, Human, AI
 from .game_controller import GameController
 from .game_model import GameModel
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from .DAO.q_table_repository import QTableRepo
 
 def main():
     choice = input("p = play t = train :")
@@ -81,8 +84,14 @@ def run_game():
         >>> from games.jeux_1 import main as game1
         >>> game1.run_game()  # Lance le jeu des allumettes
     """
+    engine = create_engine('sqlite:///cubee.db')
+    session_test = sessionmaker(bind=engine)
+    db_q_table = QTableRepo(session_test)
+
     player1 = AI("jean")
     player2 = Human("moi")
+
+
     app = GameController(player1, player2)
     app.mainloop()
 

@@ -5,7 +5,7 @@ Fait le lien entre GameModel (logique métier) et GameView (interface graphique)
 
 from typing import Optional
 
-from .game_dto import GameStateDTO
+from .DAO.dao import GameStateDTO
 from .game_model import GameModel
 from .game_view import GameView
 from .player import Player, Human
@@ -125,6 +125,7 @@ class GameController:
 
         success = current.play()
         if not success:
+            self.view.flash_invalid_move()
             self.model.next_player()
             self._refresh_view()
             self._maybe_ia_move()

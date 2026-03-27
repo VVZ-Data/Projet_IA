@@ -1,13 +1,16 @@
 """ Repository q-table"""
 
 from DAO.q_table import QTable
+from sqlalchemy import Base, create_engine
 
 class QTableRepo:
 
     def __init__(self, session):
         """
             Initialise le repository avec une session SQLAlchemy.
-        """    
+        """
+        engine = create_engine('sqlite:///cubee.db')
+        Base.metadata.create_all(engine)    
         self.session = session
 
     def create(self, gama, lr, state, action_up, action_down, action_left, action_right):
