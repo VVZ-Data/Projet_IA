@@ -1,7 +1,7 @@
 """
     model db q_table
 """
-from base import Base
+from .base import Base
 from sqlalchemy import Column, Integer, Float, String, Tuple
 
 
@@ -18,8 +18,11 @@ class QTable(Base):
 
     __tablename__ = 'q_table'
 
-    """Identifiant unique de l'entrée."""
-    id = Column(Tuple, primary_key=True)
+    """gama fait partie de la clés composite"""
+    gama = Column(Float, primary_key=True)
+
+    """alpha ou learning rate fait partie de la clés composite"""
+    lr  = Column(Float, primary_key=True)
 
     """Etat"""
     state = Column(String(1000))

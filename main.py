@@ -1,7 +1,6 @@
 from games.jeux_1.main import main as a
 from games.jeux_2.main import main as c
 
-from sqlalchemy import create_engine, Base
 
 
 if __name__ == "__main__":

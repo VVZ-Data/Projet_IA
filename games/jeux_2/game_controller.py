@@ -5,7 +5,7 @@ Fait le lien entre GameModel (logique métier) et GameView (interface graphique)
 
 from typing import Optional
 
-from .DAO.dao import GameStateDTO
+from .dao.dao import GameStateDTO
 from .game_model import GameModel
 from .game_view import GameView
 from .player import Player, Human

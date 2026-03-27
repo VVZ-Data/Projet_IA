@@ -7,7 +7,7 @@ import copy
 from collections import deque
 from typing import Dict, List, Optional, Tuple
 
-from .DAO.dao import GameStateDTO
+from .dao.dao import GameStateDTO
 from .player import Player, Human
 
 
