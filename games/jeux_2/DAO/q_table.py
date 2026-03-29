@@ -2,30 +2,24 @@
     model db q_table
 """
 from .base import Base
-from sqlalchemy import Column, Integer, Float, String, Tuple
+from sqlalchemy import Column, Integer, Float, String, UniqueConstraint
 
 
 class QTable(Base):
     """
         Représente la q-table du joueur IA de Cubee.
-
-        Chaque ligne correspond à un état possible du plateau,
-        défini par la position du cube (cube_x, cube_y).
-        Les valeurs Q indiquent la qualité estimée de chaque action
-        depuis cet état. Plus la valeur est haute, meilleure est l'action.
-        L'IA met à jour ces valeurs après chaque partie.
     """
 
     __tablename__ = 'q_table'
 
-    """gama fait partie de la clés composite"""
-    gama = Column(Float, primary_key=True)
+    """gama clés composite"""
+    gama = Column(String(10), primary_key=True)
 
-    """alpha ou learning rate fait partie de la clés composite"""
-    lr  = Column(Float, primary_key=True)
+    """alpha ou learning rate clés composite"""
+    learning_rate  = Column(String(10), primary_key=True)
 
     """Etat"""
-    state = Column(String(1000))
+    state = Column(String(1000), primary_key=True, index=True)
 
     """Valeur Q pour l'action aller en haut depuis cet état."""
     action_up = Column(Float)
@@ -38,3 +32,4 @@ class QTable(Base):
 
     """Valeur Q pour l'action aller à gauche depuis cet état."""
     action_left = Column(Float)
+

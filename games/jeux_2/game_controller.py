@@ -11,6 +11,7 @@ from .game_view import GameView
 from .player import Player, Human
 
 
+
 class GameController:
     """
     Contrôleur principal du jeu Cubee.
@@ -48,6 +49,7 @@ class GameController:
         """
         self.players = {1: player1, 2: player2}
         self.model = GameModel(player1, player2, size)
+
 
         # Lier chaque joueur au modèle pour que play() fonctionne
         player1.game = self.model
@@ -130,11 +132,10 @@ class GameController:
             self._refresh_view()
             self._maybe_ia_move()
             return
-
         self._refresh_view()
 
         if self.model.is_game_over():
-            self.view.after(200, self.handle_end_game)
+            self.handle_end_game
         else:
             self._maybe_ia_move()
 
@@ -145,7 +146,15 @@ class GameController:
         winner_name: Optional[str] = (
             self.model.players[winner_id].name if winner_id else None
         )
-        self.view.show_game_over(winner_name)
+
+        ai = next((p for p in self.players.values() if hasattr(p, 'q_table')), None)
+        if ai:
+            ai.q_table.commit()
+
+        if not any(p.is_human() for p in self.players.values()):
+            self.view.after(10, self.handle_new_game)
+        else:
+            self.view.show_game_over(winner_name)
 
 
     # ──────────────────────────────────────────────────────────────────────────

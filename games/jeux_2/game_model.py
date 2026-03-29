@@ -417,7 +417,11 @@ class GameModel:
     # ──────────────────────────────────────────────
 
     def reset(self) -> None:
-        """Réinitialise complètement la partie."""
+        """
+        ai = next((player for player in self.players.values() if hasattr(player, 'q_table')), None)
+        if ai:
+            ai.q_table.commit()
+        """
         self._initialize_game()
 
 
