@@ -213,9 +213,6 @@ class GameView(tk.Tk):
         self.bind("<Down>",      lambda _e: self.controller.handle_move("down"))
         self.bind("<Left>",      lambda _e: self.controller.handle_move("left"))
         self.bind("<Right>",     lambda _e: self.controller.handle_move("right"))
-        self.bind("<Control-z>", lambda _e: self.controller.handle_undo())
-        self.bind("<u>",         lambda _e: self.controller.handle_undo())
-        self.bind("<n>",         lambda _e: self.controller.handle_new_game())
         self.focus_set()
 
     # ──────────────────────────────────────────────────────────────────────────

@@ -7,7 +7,6 @@ import copy
 from collections import deque
 from typing import Dict, List, Optional, Tuple
 
-from .game_dto import GameStateDTO
 from .player import Player, Human
 
 
@@ -94,31 +93,7 @@ class GameModel:
     # Sérialisation d'état 
     # ──────────────────────────────────────────────
 
-    def get_state(self) -> dict:
-        """
-        Retourne une copie profonde de l'état courant.
-
-        Returns:
-            Dictionnaire contenant board, player_pos et player_turn.
-        """
-        return {
-            "board":       copy.deepcopy(self.board),
-            "player_pos":  copy.deepcopy(self.player_position),
-            "player_turn": self.player_turn,
-        }
-
-    def _restore_state(self, state: dict) -> None:
-        """
-        Restaure l'état du jeu depuis un instantané.
-
-        Args:
-            state: Dictionnaire produit par get_state().
-        """
-        self.board = copy.deepcopy(state["board"])
-        self.player_position = copy.deepcopy(state["player_pos"])
-        self.player_turn = state["player_turn"]
-
-    def get_state_dto(self) -> GameStateDTO:
+    def get_state_dto(self) -> dict:
         """
         Construit et retourne un DTO représentant l'état courant complet.
 
@@ -129,17 +104,42 @@ class GameModel:
             Instané de GameStateDTO décrivant la partie à cet instant.
         """
         scores = self.get_scores()
-        return GameStateDTO(
-            size=self.size,
-            board=copy.deepcopy(self.board),
-            turn=self.player_turn,
-            position_player1=self.player_position[1],
-            position_player2=self.player_position[2],
-            player_names={key: player.name for key, player in self.players.items()},
-            scores=scores,
-            is_game_over=self.is_game_over(),
-            winner=self.get_winner(),
-        )
+        return  {
+            'size' : self.size,
+            'board' : copy.deepcopy(self.board),
+            'turn' : self.player_turn,
+            'position_player1' : self.player_position[1],
+            'position_player2' : self.player_position[2],
+            'player_names' : {key: player.name for key, player in self.players.items()},
+            'scores' : scores,
+            'is_game_over' : self.is_game_over(),
+            'winner' : self.get_winner(),
+        }
+    
+    def to_dict(self, dto) -> dict:
+        """
+        Sérialise un GameStateDTO en dictionnaire JSON-compatible.
+
+        Convertit les types Python non sérialisables (tuples, entiers
+        en clé de dictionnaire) en types compatibles JSON.
+
+        Args:
+            dto: Instantané de l'état de la partie à sérialiser.
+
+        Returns:
+            Dictionnaire JSON-compatible représentant l'état complet.
+        """
+        return {
+            "size":             dto.size,
+            "board":            "".join(str(cell) for row in dto.board for cell in row),
+            "turn":             dto.turn,
+            "position_player1": list(dto.position_player1),
+            "position_player2": list(dto.position_player2),
+            "player_names":     {str(k): v for k, v in dto.player_names.items()},
+            "scores":           {str(k): v for k, v in dto.scores.items()},
+            "is_game_over":     dto.is_game_over,
+            "winner":           dto.winner,
+        }
 
     # ──────────────────────────────────────────────
     # Validation & déplacement
@@ -416,7 +416,11 @@ class GameModel:
     # ──────────────────────────────────────────────
 
     def reset(self) -> None:
-        """Réinitialise complètement la partie."""
+        """
+        ai = next((player for player in self.players.values() if hasattr(player, 'q_table')), None)
+        if ai:
+            ai.q_table.commit()
+        """
         self._initialize_game()
 
 
