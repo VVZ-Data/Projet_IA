@@ -116,30 +116,6 @@ class GameModel:
             'winner' : self.get_winner(),
         }
     
-    def to_dict(self, dto) -> dict:
-        """
-        Sérialise un GameStateDTO en dictionnaire JSON-compatible.
-
-        Convertit les types Python non sérialisables (tuples, entiers
-        en clé de dictionnaire) en types compatibles JSON.
-
-        Args:
-            dto: Instantané de l'état de la partie à sérialiser.
-
-        Returns:
-            Dictionnaire JSON-compatible représentant l'état complet.
-        """
-        return {
-            "size":             dto.size,
-            "board":            "".join(str(cell) for row in dto.board for cell in row),
-            "turn":             dto.turn,
-            "position_player1": list(dto.position_player1),
-            "position_player2": list(dto.position_player2),
-            "player_names":     {str(k): v for k, v in dto.player_names.items()},
-            "scores":           {str(k): v for k, v in dto.scores.items()},
-            "is_game_over":     dto.is_game_over,
-            "winner":           dto.winner,
-        }
 
     # ──────────────────────────────────────────────
     # Validation & déplacement
