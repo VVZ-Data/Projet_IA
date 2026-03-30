@@ -119,6 +119,7 @@ def run_game():
     player1 = AI("jean")
     player1.q_table = db_q_table
     player1.init_db()
+    
     player2 = Human("moi")
     app = GameController(player1, player2)
     app.mainloop()

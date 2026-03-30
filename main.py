@@ -76,9 +76,9 @@ class GameCollectionApp(tk.Tk):
         # === MAPPING DES JEUX VERS LEURS MODULES ===
         # Ajouter ici les futurs jeux au fur et à mesure
         game_modules = {
-            "matchstick": "games.jeux_1.main",
-            "Cubee": "games.jeux_2.main",
-            "Kart": "games.jeux_3.main",
+            "matchstick": "games.allumette.main",
+            "Cubee": "games.cubee.main",
+            "Kart": "games.pixel_kart.main",
             # "game3": "games.jeux_3.main",
         }
         
