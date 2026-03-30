@@ -7,7 +7,6 @@ import copy
 from collections import deque
 from typing import Dict, List, Optional, Tuple
 
-from .dao.dao import GameStateDTO
 from .player import Player, Human
 
 
@@ -94,7 +93,7 @@ class GameModel:
     # Sérialisation d'état 
     # ──────────────────────────────────────────────
 
-    def get_state_dto(self) -> GameStateDTO:
+    def get_state_dto(self) -> dict:
         """
         Construit et retourne un DTO représentant l'état courant complet.
 
@@ -105,19 +104,19 @@ class GameModel:
             Instané de GameStateDTO décrivant la partie à cet instant.
         """
         scores = self.get_scores()
-        return GameStateDTO(
-            size=self.size,
-            board=copy.deepcopy(self.board),
-            turn=self.player_turn,
-            position_player1=self.player_position[1],
-            position_player2=self.player_position[2],
-            player_names={key: player.name for key, player in self.players.items()},
-            scores=scores,
-            is_game_over=self.is_game_over(),
-            winner=self.get_winner(),
-        )
+        return  {
+            'size' : self.size,
+            'board' : copy.deepcopy(self.board),
+            'turn' : self.player_turn,
+            'position_player1' : self.player_position[1],
+            'position_player2' : self.player_position[2],
+            'player_names' : {key: player.name for key, player in self.players.items()},
+            'scores' : scores,
+            'is_game_over' : self.is_game_over(),
+            'winner' : self.get_winner(),
+        }
     
-    def to_dict(self, dto: GameStateDTO) -> dict:
+    def to_dict(self, dto) -> dict:
         """
         Sérialise un GameStateDTO en dictionnaire JSON-compatible.
 

@@ -5,7 +5,6 @@ Fait le lien entre GameModel (logique métier) et GameView (interface graphique)
 
 from typing import Optional
 
-from .dao.dao import GameStateDTO
 from .game_model import GameModel
 from .game_view import GameView
 from .player import Player, Human
@@ -171,7 +170,7 @@ class GameController:
         current_name = self.model.players[self.model.player_turn].name
         return f"Tour de {current_name}."
 
-    def get_state_dto(self) -> GameStateDTO:
+    def get_state_dto(self) -> dict:
         """Retourne un DTO décrivant l'état courant complet de la partie."""
         return self.model.get_state_dto()
 
@@ -192,16 +191,16 @@ class GameController:
     def _refresh_view(self) -> None:
         """Synchronise la Vue avec l'état courant du Modèle."""
         dto = self.model.get_state_dto()
-        players_positions = {1: (dto.position_player1), 2: (dto.position_player2)}
+        players_positions = {1: (dto['position_player1']), 2: (dto['position_player2'])}
         self.view.update_board(
-            dto.board,
+            dto['board'],
             players_positions,
-            dto.size
+            dto['size']
         )
         self.view.update_scores(
-            dto.scores,
-            dto.turn,
-            dto.player_names
+            dto['scores'],
+            dto['turn'],
+            dto['player_names']
         )
 
     # ──────────────────────────────────────────────────────────────────────────

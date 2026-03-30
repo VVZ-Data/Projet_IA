@@ -127,9 +127,9 @@ class AI(Player):
         Returns:
             Clé unique représentant l'état.
         """
-        board_flat = "".join(str(cell) for row in state.board for cell in row)
+        board_flat = "".join(str(cell) for row in state['board'] for cell in row)
 
-        return f"{state.turn}_{state.position_player2}_{state.position_player1}_{state.scores[1]}_{state.scores[2]}_{board_flat}"
+        return f"{state['turn']}_{state['position_player2']}_{state['position_player1']}_{state['scores'][1]}_{state['scores'][2]}_{board_flat}"
     
     def play(self):
         """
@@ -138,7 +138,7 @@ class AI(Player):
         """
 
         state = self.game.get_state_dto() # état du jeux
-        score_before = state.scores[state.turn]
+        score_before = state['scores'][state['turn']]
 
         if random.random() < self.epsilon:
             # Bot aléatoire qui peut se tromper (coups valides ET invalides) -> exploration
@@ -226,14 +226,14 @@ class AI(Player):
         self.q_table.update_q_value(str(self.gama), str(self.learning_rate), state, action, new_q)
 
     def _compute_reward(self, state_before, state_after):
-        my_turn = state_before.turn
+        my_turn = state_before['turn']
         opponent = 3 - my_turn
 
         # Points que je gagne
-        my_gain = state_after.scores[my_turn] - state_before.scores[my_turn]
+        my_gain = state_after['scores'][my_turn] - state_before['scores'][my_turn]
     
         # Points que j'offre à l'adversaire
-        opponent_gain = state_after.scores[opponent] - state_before.scores[opponent]
+        opponent_gain = state_after['scores'][opponent] - state_before['scores'][opponent]
 
         return my_gain - 0.5 * opponent_gain
 
