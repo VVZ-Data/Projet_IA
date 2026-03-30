@@ -107,7 +107,18 @@ def run_game():
         >>> from games.jeux_1 import main as game1
         >>> game1.run_game()  # Lance le jeu des allumettes
     """
+
+    engine = create_engine('sqlite:///cubee.db')
+    Base.metadata.create_all(engine)
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    db_q_table = QTableRepo(session)
+
+
     player1 = AI("jean")
+    player1.q_table = db_q_table
+    player1.init_db()
     player2 = Human("moi")
     app = GameController(player1, player2)
     app.mainloop()
