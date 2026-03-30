@@ -18,15 +18,8 @@ def main():
 
     choice = input("p = play t = train :")
     if choice == 'p':
-
-
-
         player_1 = Human("Ethan")
-        player_2 = AI("Adrien", 0.05, 0.05, 0.0)
-        player_2.q_table = db_q_table
-        player_2.init_db()
-
-        
+        player_2 = Player("Adrien")
     
         GameController(player_1, player_2, size=5).run()
     else:
@@ -114,15 +107,8 @@ def run_game():
         >>> from games.jeux_1 import main as game1
         >>> game1.run_game()  # Lance le jeu des allumettes
     """
-  
-
-
     player1 = AI("jean")
     player2 = Human("moi")
-
-
     app = GameController(player1, player2)
     app.mainloop()
-
-
 
