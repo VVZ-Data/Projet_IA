@@ -69,7 +69,13 @@ class Player:
     def is_human(self) -> bool:
         """Retourne False ou True en fonction du type de joueurs."""
         return self.type == "human"
-
+        
+    @property
+    def nb_games(self) -> int:
+        """
+        Retourne le nombre de game
+        """
+        return self.nb_loses + self.nb_draws + self.nb_wins
 
 
 class Human(Player):
@@ -133,12 +139,24 @@ class AI(Player):
     
     def play(self):
         """
-        Joue de façon random avec erreur possible au début de l'entrainement
-        Met à jour la q-table
-        """
+        Joue un tour du jeu en utilisant une stratégie mixte d'exploration et d'exploitation, 
+        puis met à jour la Q-table en conséquence.
+
+        Fonctionnement :
+        - Récupère l'état actuel du jeu.
+        - Si un tirage aléatoire < epsilon, le bot joue un coup aléatoire (exploration) 
+      qui peut être valide ou invalide.
+        - Sinon, le bot choisit le meilleur coup selon la Q-table (exploitation).
+        - Si le coup est exécuté avec succès :
+            - Récupère le nouvel état du jeu.
+            - Calcule la récompense basée sur la différence de score.
+            - Met à jour la Q-table via la méthode `update()`.
+
+    Returns:
+        bool: True si le mouvement a été exécuté avec succès, False sinon.
+    """
 
         state = self.game.get_state_dto() # état du jeux
-        score_before = state['scores'][state['turn']]
 
         if random.random() < self.epsilon:
             # Bot aléatoire qui peut se tromper (coups valides ET invalides) -> exploration
@@ -157,12 +175,7 @@ class AI(Player):
             self.update(reward) #calcule q-table 
 
         return success
-    @property
-    def nb_games(self) -> int:
-        """
-        Retourne le nombre de game
-        """
-        return self.nb_loses + self.nb_draws + self.nb_wins
+
     
     def next_epsilon(self, coefficient=0.95, minimum=0.05):
         """
@@ -209,6 +222,23 @@ class AI(Player):
         self.q_table.init_final_states(str(self.gama), str(self.learning_rate))
     
     def update(self, reward):
+        """
+        Met à jour la Q-table en utilisant la formule de Q-learning.
+
+        Fonctionnement :
+        - Récupère l'état suivant du jeu et l'encode.
+        - Récupère l'état et l'action précédemment effectués (`last_state`, `last_action`).
+        - Pour tous les coups possibles, calcule la meilleure valeur Q du prochain état.
+        - Calcule la nouvelle valeur Q selon la formule :
+            Q(s, a) ← Q(s, a) + learning_rate * (reward + gamma * max Q(s', a') - Q(s, a))
+        - Met à jour la Q-table avec la nouvelle valeur calculée.
+
+        Args:
+            reward (float): La récompense obtenue après le dernier mouvement.
+
+        Returns:
+            None
+        """
         next_state = self.game.get_state_dto()
         next_state = self._encode_state(next_state)
 
@@ -226,6 +256,20 @@ class AI(Player):
         self.q_table.update_q_value(str(self.gama), str(self.learning_rate), state, action, new_q)
 
     def _compute_reward(self, state_before, state_after):
+        """
+        Calcule la récompense obtenue après un mouvement dans le jeu.
+
+        La récompense est définie comme la différence de score du joueur actuel
+        moins la moitié du gain accordé à l’adversaire. Cela favorise les coups
+        qui augmentent le score personnel tout en limitant les gains de l’adversaire.
+
+        Args:
+            state_before (dict): L'état du jeu avant le mouvement, incluant les scores et le joueur actif.
+            state_after (dict): L'état du jeu après le mouvement.
+
+        Returns:
+            float: La récompense calculée pour le mouvement effectué.
+        """
         my_turn = state_before['turn']
         opponent = 3 - my_turn
 

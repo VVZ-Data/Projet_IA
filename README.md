@@ -109,7 +109,8 @@ L'agent intelligent repose sur l'algorithme de **Q-Learning** (Reinforcement Lea
 git clone https://github.com/VVZ-Data/Projet_IA.git
 cd Projet_IA
 
-# 2. Installation des dépendances de développement
+# 2. Installation des dépendances de développement et lancement de l'environement
+.\env\Scripts\activate 
 pip install -r requirements.txt
 ```
 
