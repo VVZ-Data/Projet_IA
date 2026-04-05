@@ -14,6 +14,7 @@ Projet: IN252 - Projet de Conception IA - HENaLLux 2025-2026
 
 import tkinter as tk
 from views.home_view import HomeView
+from games.cubee.main import train
 from language_manager import lang_manager
 
 
@@ -122,4 +123,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    choice = input("p pour play t pour train : ")
+    if choice == 'p':
+        main()
+    else:
+        train()
