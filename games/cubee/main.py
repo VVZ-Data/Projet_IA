@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, inspect
 from .dao.q_table_repository import QTableRepo
 from .dao.base import Base
-from tkinter import mainloop
+from .ai_train import train_ai
 
 def main():
 
@@ -33,65 +33,47 @@ def main():
         player_1.init_db()
         player_2.init_db()
 
-        training(player_1, player_2, 100_000, 1000, 5)
+
+
+def train():
+    engine = create_engine('sqlite:///cubee.db')
+    Base.metadata.create_all(engine)
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    db_q_table = QTableRepo(session)
+
+    ai1 = AI("Jean", 0.05, 0.05)
+    ai2 = AI("Jean2", 0.05, 0.05)
+
+    ai3 = AI("Adrien", 0.1, 0.05)
+    ai4 = AI("Adrien2", 0.1, 0.05)
+
+    ai5 = AI("aeneas", 0.05, 0.1)
+    ai6 = AI("aeneas2", 0.05, 0.1)
+
+    ai7 = AI("Snow", 0.005, 0.005)
+    ai8 = AI("snow2", 0.005, 0.005)
+
+    ai9 = AI("ambre", 0.001, 0.001)
+    ai10 = AI("ambre2", 0.001, 0.001)
+
+    ai1.q_table = db_q_table
+    ai2.q_table = db_q_table
+    ai3.q_table = db_q_table
+    ai4.q_table = db_q_table
+    ai5.q_table = db_q_table
+    ai6.q_table = db_q_table
+    ai7.q_table = db_q_table
+    ai8.q_table = db_q_table
+    ai9.q_table = db_q_table
+    ai10.q_table = db_q_table
+
+
+    train_ai(ai1, ai2, ai3, ai4, ai5, ai6, ai7, ai8, ai9, ai10, nb_games=100_000)
 
 
 
-        compare_ai(player_1, player_2)
-
-
-
-def compare_ai(*ais):
-    # Print a comparison between the @ais
-    names = f"{'':4}"
-    stats1 = f"{'':4}"
-    stats2 = f"{'':4}"
-
-    for ai in ais :
-        names += f"{ai.name:^15}"
-        stats1 += f"{str(ai.nb_wins)+'/'+str(ai.nb_games):^15}"
-        stats2 += f"{f'{ai.nb_wins/ai.nb_games*100:4.4}'+'%':^15}"
-
-    print(names)
-    print(stats1)
-    print(stats2)
-
-    print(f"{'-'*4}{'-'*len(ais)*15}")     
-
-
-def training(ai1, ai2, nb_games, nb_epsilon, size):
-    # Train the AIs @ai1 and @ai2 during @nb_games games
-    # epsilon decrease every @nb_epsilon games
-    training_game = GameModel(ai1, ai2, size, displayable = False)
-    for i in range(0, nb_games):
-        if i % nb_epsilon == 0:
-            if type(ai1)==AI : ai1.next_epsilon()
-            if type(ai2)==AI : ai2.next_epsilon()
-
-        training_game.play()
-
-        if i % 1000 == 0:
-            ai = next((a for a in [ai1, ai2] if hasattr(a, 'q_table')), None)
-            if ai:
-                ai.q_table.commit()
-
-        training_game.reset()
-
-    if nb_games % 100 != 0:
-        ai = next((a for a in [ai1, ai2] if hasattr(a, 'q_table')), None)
-        if ai:
-            ai.q_table.commit()
-            
-def testing(ai, random_player, nb_games):
-    test_game = GameModel(ai, random_player, displayable=False)
-    wins = 0
-    for i in range(nb_games):
-        test_game.play()
-        if test_game.get_winner() == ai:
-            wins +=1 
-        test_game.reset()
-
-    print(f"{wins/nb_games*100:.2f}%")
 
 def run_game():
     """

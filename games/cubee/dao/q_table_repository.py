@@ -63,4 +63,3 @@ class QTableRepo:
 
     def commit(self):
         self.session.commit()
-        print(f"commit ok") 
