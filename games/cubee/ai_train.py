@@ -1,6 +1,9 @@
 from .game_model import GameModel
 from .player import Player
 from time import time
+from math import log
+
+_NB_STEPS = log(0.05 / 0.9) / log(0.95) 
 
 def compare_ai(*ais):
     # Print a comparison between the @ais
@@ -23,25 +26,24 @@ def compare_ai(*ais):
 def training(ai1, ai2, nb_games, nb_epsilon, size):
     # Train the AIs @ai1 and @ai2 during @nb_games games
     # epsilon decrease every @nb_epsilon games
+    ais_with_qtable = [a for a in [ai1, ai2] if hasattr(a, 'q_table')]
+    commit_interval = max(1000, nb_games // 10)  # adaptatif selon nb_games
+
     training_game = GameModel(ai1, ai2, size, displayable = False)
     for i in range(0, nb_games):
         if i % nb_epsilon == 0:
             if ai1.type =='AI' : ai1.next_epsilon()
-            if ai2.type =='AI' : ai1.next_epsilon()
+            if ai2.type =='AI' : ai2.next_epsilon()
 
         training_game.play()
-
-        if i % 1000 == 0:
-            ai = next((a for a in [ai1, ai2] if hasattr(a, 'q_table')), None)
-            if ai:
-                ai.q_table.commit()
-
         training_game.reset()
 
-    if nb_games % 1000 != 0:
-        ai = next((a for a in [ai1, ai2] if hasattr(a, 'q_table')), None)
-        if ai:
-            ai.q_table.commit()
+        if i % commit_interval == 0 and i > 0:
+            for ai in ais_with_qtable:  # ✅ commit tous les AIs
+                ai.q_table.commit()
+
+    for ai in ais_with_qtable:
+        ai.q_table.commit()
             
 def testing(*ais, nb_games):
     random_player = Player("random")
@@ -54,12 +56,13 @@ def testing(*ais, nb_games):
                 wins +=1 
             test_game.reset()
 
-    print(f"{wins/nb_games*100:.2f}%")
+        print(f"{wins/nb_games*100:.2f}%")
 
 def train_ai(*ais, nb_games):
-    epsilon_range = 0.9 - 0.05
-    nb_epsilon = (nb_games/len(ais)) /epsilon_range
-    
+
+    nb_epsilon = int(nb_games / _NB_STEPS)
+
+
     start = time()
 
     for ai1 in ais:
@@ -76,8 +79,8 @@ def train_ai(*ais, nb_games):
                 print(f"ai {ai1} vs ai {ai2} train end en {elapsed_step} seconde")
                 
 
-    testing(*ais, nb_games=1000)
-    compare_ai(ais)
+        testing(*ais, nb_games=1000)
+    compare_ai(*ais)
 
     end = time()
 
