@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, inspect
 from .dao.q_table_repository import QTableRepo
 from .dao.base import Base
+from tkinter import mainloop
 
 def main():
 
@@ -122,5 +123,5 @@ def run_game():
     
     player2 = Human("moi")
     app = GameController(player1, player2)
-    app.mainloop()
+    mainloop()
 
