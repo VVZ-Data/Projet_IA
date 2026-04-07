@@ -105,5 +105,5 @@ def run_game():
     
     player2 = Human("moi")
     app = GameController(player1, player2)
-    app.mainloop()
+    mainloop()
 

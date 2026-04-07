@@ -86,8 +86,6 @@ class GameModel:
         self.player_turn: int = 1
         self.winner = None
         self.loser  = None
-        # Vider l'historique
-        self.history = []
 
     # ──────────────────────────────────────────────
     # Sérialisation d'état 
