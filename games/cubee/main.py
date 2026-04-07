@@ -52,11 +52,8 @@ def train():
     ai5 = AI("aeneas", 0.05, 0.1)
     ai6 = AI("aeneas2", 0.05, 0.1)
 
-    ai7 = AI("Snow", 0.005, 0.005)
-    ai8 = AI("snow2", 0.005, 0.005)
-
-    ai9 = AI("ambre", 0.001, 0.001)
-    ai10 = AI("ambre2", 0.001, 0.001)
+    ai7 = AI("ambre", 0.001, 0.001)
+    ai8 = AI("ambre2", 0.001, 0.001)
 
     ai1.q_table = db_q_table
     ai2.q_table = db_q_table
@@ -66,11 +63,10 @@ def train():
     ai6.q_table = db_q_table
     ai7.q_table = db_q_table
     ai8.q_table = db_q_table
-    ai9.q_table = db_q_table
-    ai10.q_table = db_q_table
 
 
-    train_ai(ai1, ai2, ai3, ai4, ai5, ai6, ai7, ai8, ai9, ai10, nb_games=100_000)
+
+    train_ai(ai1, ai2, ai3, ai4, ai5, ai6, ai7, ai8, nb_games= 50_000)
 
 
 

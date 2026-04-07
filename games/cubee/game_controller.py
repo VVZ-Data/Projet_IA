@@ -145,11 +145,11 @@ class GameController:
         winner_name: Optional[str] = (
             self.model.players[winner_id].name if winner_id else None
         )
-
+        """
         ai = next((p for p in self.players.values() if hasattr(p, 'q_table')), None)
         if ai:
             ai.q_table.commit()
-
+        """
         if not any(p.is_human() for p in self.players.values()):
             self.view.after(10, self.handle_new_game)
         else:
