@@ -22,14 +22,14 @@ class QTable(Base):
     state = Column(String(1000), primary_key=True, index=True)
 
     """Valeur Q pour l'action aller en haut depuis cet état."""
-    action_up = Column(Float)
+    speed_up = Column(Float)
 
     """Valeur Q pour l'action aller en bas depuis cet état."""
-    action_down = Column(Float)
+    slow_down = Column(Float)
 
     """Valeur Q pour l'action aller à droite depuis cet état."""
-    action_right = Column(Float)
+    right = Column(Float)
 
     """Valeur Q pour l'action aller à gauche depuis cet état."""
-    action_left = Column(Float)
+    left = Column(Float)
 

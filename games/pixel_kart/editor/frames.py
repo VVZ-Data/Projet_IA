@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-import const
+from games.pixel_kart.editor import const
 
 class CircuitFrame(ttk.Frame):
     """

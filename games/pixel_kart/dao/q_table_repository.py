@@ -1,7 +1,6 @@
 """ Repository q-table"""
 
 from .q_table import QTable
-from .base import Base
 
 
 class QTableRepo:
@@ -28,7 +27,7 @@ class QTableRepo:
             self.cache[key] = row
         row = self.cache.get(key)
         if row:
-            return getattr(row, f"action_{action}", 0.0) or 0.0
+            return getattr(row, f"{action}", 0.0) or 0.0
         return 0.0
 
     def update_q_value(self, gama, learning_rate, state, action, new_value):
@@ -38,7 +37,7 @@ class QTableRepo:
             setattr(row, f"action_{action}", new_value)
             self.cache[key] = row  # met à jour le cache
         else:
-            new_row = QTable(gama=str(gama), learning_rate=str(learning_rate), state=state, **{f"action_{action}": new_value})
+            new_row = QTable(gama=str(gama), learning_rate=str(learning_rate), state=state, **{f"{action}": new_value})
             self.session.add(new_row)
             self.cache[key] = new_row
         self.session.flush()

@@ -16,6 +16,7 @@ import tkinter as tk
 from views.home_view import HomeView
 from games.cubee.main import train
 from language_manager import lang_manager
+from games.pixel_kart.editor.map_editor import CircuitEditor
 
 
 class GameCollectionApp(tk.Tk):
@@ -123,8 +124,15 @@ def main():
 
 
 if __name__ == "__main__":
+    """
     choice = input("p pour play t pour train : ")
     if choice == 'p':
         main()
     else:
         train()
+    """
+
+    root = tk.Tk()
+    root.withdraw()  # Hide the root window
+    editor = CircuitEditor(root, callback=lambda x : print(f"Callback with {x}"))
+    editor.mainloop()
