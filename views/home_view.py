@@ -125,12 +125,12 @@ class HomeView(Frame):
         )
         self.card2.grid(row=0, column=1, padx=15, pady=20, sticky="nsew")
         
-        # Jeu 3 : À venir
+        # Jeu 3 : Pixel Kart
         self.card3 = GameCard(
             parent,
             title=lang_manager.get_text("pixelKart_game"),
             emoji="🎲",
-            enabled=False,
+            enabled=True,
             on_click=lambda: self._on_game_click("Kart")
         )
         self.card3.grid(row=0, column=2, padx=15, pady=20, sticky="nsew")
