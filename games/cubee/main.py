@@ -98,8 +98,15 @@ def run_game():
     player1 = AI("jean")
     player1.q_table = db_q_table
     player1.init_db()
-    
+
     player2 = Human("moi")
-    app = GameController(player1, player2)
-    mainloop()
+
+    def on_back():
+        """Retour à la sélection des jeux depuis Cubee."""
+        app.view.destroy()
+        import main as root_main
+        root_main.main()
+
+    app = GameController(player1, player2, on_back=on_back)
+    app.view.mainloop()
 

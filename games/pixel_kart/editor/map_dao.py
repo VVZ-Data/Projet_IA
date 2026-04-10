@@ -1,6 +1,7 @@
 import os
 
-FILE_PATH = "games/pixel_kart/editor/circuits.txt"
+# Chemin absolu vers le fichier de circuits, indépendant du cwd
+FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "circuits.txt")
 
 def get_all():
     """Retrieve all circuits from the file as a dictionary {name: str}."""

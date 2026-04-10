@@ -37,15 +37,17 @@ class GameView(tk.Tk):
     EMOJI_P1     = "😊"
     EMOJI_P2     = "😞"
 
-    def __init__(self, controller) -> None:
+    def __init__(self, controller, on_back=None) -> None:
         """
         Initialise la fenêtre principale et construit l'interface.
 
         Args:
             controller: Référence vers le GameController.
+            on_back   : callback optionnel appelé par le bouton Back en haut à gauche.
         """
         super().__init__()
         self.controller = controller
+        self.on_back = on_back
         self.title("Cubee — Territory Game")
         self.configure(bg=self.COLOR_BG)
         self.resizable(False, False)
@@ -66,14 +68,32 @@ class GameView(tk.Tk):
         self._build_status_bar()
 
     def _build_header(self) -> None:
-        """Crée l'en-tête : titre + panneau des scores."""
+        """Crée l'en-tête : bouton back + titre + panneau des scores."""
+        # ── Barre du haut : bouton Back en haut à gauche ───────────────
+        top_bar = tk.Frame(self, bg=self.COLOR_BG)
+        top_bar.pack(fill=tk.X, padx=15, pady=(10, 0))
+
+        self.back_btn = tk.Button(
+            top_bar,
+            text="← Back",
+            font=("Helvetica", 11),
+            bg=self.COLOR_BG,
+            fg=self.COLOR_TEXT,
+            relief=tk.FLAT,
+            cursor="hand2",
+            activebackground=self.COLOR_PANEL,
+            activeforeground=self.COLOR_TEXT,
+            command=self._on_back_click,
+        )
+        self.back_btn.pack(side=tk.LEFT)
+
         # ── Titre ──────────────────────────────────────────────────────
         title_lbl = tk.Label(
             self, text="CUBEE",
             font=("Helvetica", 28, "bold"),
             bg=self.COLOR_BG, fg=self.COLOR_TEXT
         )
-        title_lbl.pack(pady=(15, 5))
+        title_lbl.pack(pady=(5, 5))
 
         subtitle_lbl = tk.Label(
             self, text="Territory Capture Game",
@@ -365,6 +385,11 @@ class GameView(tk.Tk):
 
         if messagebox.askyesno("Fin de partie", message):
             self.controller.handle_new_game()
+
+    def _on_back_click(self) -> None:
+        """Bouton Back en haut à gauche : appelle le callback on_back."""
+        if self.on_back is not None:
+            self.on_back()
 
     # ──────────────────────────────────────────────────────────────────────────
     # Lancement
