@@ -124,4 +124,16 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+
+    choice = input("p pour play t pour train : ")
+    if choice == 'p':
+        main()
+    else:
+        train()
+
+"""
+    root = tk.Tk()
+    root.withdraw()  # Hide the root window
+    editor = CircuitEditor(root, callback=lambda x : print(f"Callback with {x}"))
+    editor.mainloop()
+"""
