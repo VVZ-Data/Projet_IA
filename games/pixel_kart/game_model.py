@@ -130,7 +130,7 @@ class Kart:
     MIN_SPEED = -1
     MAX_SPEED = 2
 
-    def __init__(self, name: str, color: str, is_ai: bool = False):
+    def __init__(self, name: str, color: str = "grey", is_ai: bool = False):
         self.name = name
         self.color = color
         self.is_ai = is_ai

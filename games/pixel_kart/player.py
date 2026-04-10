@@ -12,14 +12,14 @@ from games.pixel_kart.game_model import Kart, Race
 class Human(Kart):
     """Kart contrôlé par un humain via l'interface graphique."""
 
-    def __init__(self, name: str, color: str):
+    def __init__(self, name: str, color: str = "grey"):
         super().__init__(name=name, color=color, is_ai=False)
 
 
 class RandomAI(Kart):
     """Kart contrôlé par une IA qui joue des actions aléatoires."""
 
-    def __init__(self, name: str, color: str):
+    def __init__(self, name: str, color: str = "grey"):
         super().__init__(name=name, color=color, is_ai=True)
 
     def choose_action(self, race: Race) -> str:
