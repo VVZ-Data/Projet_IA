@@ -16,11 +16,34 @@ TRANSLATIONS = {
         "select_game": "Select a game to play",
 
         # Menu cubee
-        "menu_title": "Cubee - menu",
+        "cubee_menu_title": "Cubee",
 
         # Menu pixelKart
-        "menu_title": "Pixel Kart",
-        
+        "pixel_kart_menu_title": "Pixel Kart - Menu",
+        "pk_play": "Play",
+        "pk_training": "Training",
+        "pk_vs_ai": "vs AI",
+        "pk_vs_human": "vs Human",
+        "pk_settings": "Race settings",
+        "pk_choose_circuit": "Circuit:",
+        "pk_nb_turns": "Number of turns:",
+        "pk_open_editor": "Open circuit editor",
+        "pk_race_title": "Pixel Kart - Race",
+        "pk_time": "Time",
+        "pk_turns_to_do": "Turns to do",
+        "pk_stop": "⏹ Stop & back to menu",
+        "pk_position": "Position",
+        "pk_direction": "Direction",
+        "pk_speed": "Speed",
+        "pk_turns_done": "Turns done",
+        "pk_accelerate": "Accelerate",
+        "pk_brake": "Brake",
+        "pk_turn_left": "Turn Left",
+        "pk_turn_right": "Turn Right",
+        "pk_pass": "Pass",
+        "pk_winner": "🏆 {} wins!",
+        "pk_no_winner": "No winner — all karts crashed.",
+
         # Menu du jeu des allumettes
         "menu_title": "Matchstick Game - Menu",
         "play": "Play",
@@ -74,11 +97,34 @@ TRANSLATIONS = {
         "select_game": "Sélectionnez un jeu pour jouer",
 
         # Menu cubee
-        "menu_title": "Cubee - menu",
+        "cubee_menu_title": "Cubee",
 
         # Menu pixelKart
-        "menu_title": "Pixel Kart",
-        
+        "pixel_kart_menu_title": "Pixel Kart - Menu",
+        "pk_play": "Jouer",
+        "pk_training": "Entraînement",
+        "pk_vs_ai": "contre IA",
+        "pk_vs_human": "contre Humain",
+        "pk_settings": "Paramètres de la course",
+        "pk_choose_circuit": "Circuit :",
+        "pk_nb_turns": "Nombre de tours :",
+        "pk_open_editor": "Ouvrir l'éditeur de circuit",
+        "pk_race_title": "Pixel Kart - Course",
+        "pk_time": "Temps",
+        "pk_turns_to_do": "Tours à faire",
+        "pk_stop": "⏹ Arrêter et retour au menu",
+        "pk_position": "Position",
+        "pk_direction": "Direction",
+        "pk_speed": "Vitesse",
+        "pk_turns_done": "Tours effectués",
+        "pk_accelerate": "Accélérer",
+        "pk_brake": "Freiner",
+        "pk_turn_left": "Gauche",
+        "pk_turn_right": "Droite",
+        "pk_pass": "Passer",
+        "pk_winner": "🏆 {} gagne !",
+        "pk_no_winner": "Aucun vainqueur — tous les karts ont crashé.",
+
         # Menu du jeu des allumettes
         "menu_title": "Jeu des Allumettes - Menu",
         "play": "Jouer",

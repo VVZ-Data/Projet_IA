@@ -1,105 +1,89 @@
-# 🎮 Matchstick Game — Projet de Conception IA
+# 🎮 Game Collection — Projet de Conception IA
 
-> Jeu des Allumettes (variante Misère du Jeu de Nim) avec agents d'Intelligence Artificielle à apprentissage autonome.  
+> Collection de jeux avec agents d'Intelligence Artificielle à apprentissage autonome.  
 > Développé dans le cadre du cursus **IN252** à l'**HENaLLux**.
 
 ---
 
 ## 📋 Table des Matières
 
-- [Description du Jeu](#-description-du-jeu)
-- [Fonctionnalités Clés](#-fonctionnalités-clés)
-- [Architecture Logicielle (MVC)](#-architecture-logicielle-mvc)
-- [Intelligence Artificielle & Apprentissage](#-intelligence-artificielle--apprentissage)
-- [Guide d'Installation & Lancement](#-guide-dinstallation--lancement)
-- [Manuel d'Utilisation](#-manuel-dutilisation)
-- [Qualité du Code & Standards](#-qualité-du-code--standards)
-- [Auteurs & Crédits](#-auteurs--crédits)
+- [Jeux disponibles](#-jeux-disponibles)
+- [Architecture globale](#-architecture-globale)
+- [Guide d'installation](#-guide-dinstallation--lancement)
+- [Jeu des Allumettes](#-jeu-des-allumettes)
+- [Cubee](#-cubee)
+- [Pixel Kart](#-pixel-kart)
+- [Auteurs](#-auteurs--crédits)
 
 ---
 
-## 📖 Description du Jeu
+## 🕹️ Jeux disponibles
 
-Le jeu des allumettes est un **jeu de duel mathématique symétrique** :
-
-| Étape | Description |
-|-------|-------------|
-| **Initialisation** | Un nombre défini d'allumettes est disposé sur le plateau. |
-| **Déroulement** | Chaque joueur retire, à tour de rôle, **1, 2 ou 3 allumettes**. |
-| **Victoire** | Variante **Misère** : le joueur qui retire la **dernière allumette perd**. |
+| Jeu | Statut | IA disponible |
+|-----|--------|--------------|
+| 🔥 **Jeu des Allumettes** | ✅ Complet | Q-Learning (V-Function) |
+| 🎮 **Cubee** | ✅ Complet | Q-Learning |
+| 🎲 **Pixel Kart** | 🚧 V1 (IA random) | IA random — Q-Learning à venir |
 
 ---
 
-## ✨ Fonctionnalités Clés
+## 🏗️ Architecture globale
 
-### 🌍 Système Multilingue Dynamique
-Bascule instantanée entre **Français** et **Anglais** sans redémarrage, via un gestionnaire d'états centralisé.
-
-### 🎮 Modes de Jeu Versatiles
-- **Humain vs IA** — Testez vos capacités contre un modèle entraîné.
-- **Humain vs Random** — Mode détente contre un algorithme stochastique.
-- **IA vs IA** — Observez deux agents s'affronter pour valider la convergence des stratégies.
-
-### 🤖 Laboratoire d'Entraînement
-- Configuration granulaire des hyperparamètres (**Epsilon**, **Learning Rate**).
-- Entraînement dissocié des agents (IA 1 ou IA 2).
-- Monitoring en temps réel via barre de progression et statistiques de performance.
-- Système de **sauvegarde persistante (JSON)** pour conserver les modèles les plus performants.
-
----
-
-## 🏗️ Architecture Logicielle (MVC)
-
-Le projet adopte une **séparation stricte des préoccupations** grâce au patron Modèle-Vue-Contrôleur.
+L'application démarre depuis `main.py` (racine) qui affiche la page d'accueil.
+Chaque jeu possède son propre sous-dossier dans `games/` et expose une fonction `run_game()` appelée par l'accueil.
 
 ```
 Projet_IA/
-├── main.py
-├── game_model.py        # Modèle — état du jeu & règles métier
-├── player.py            # Modèle — comportements de décision (Random, Q-Learning)
-├── game_controller.py   # Contrôleur — médiateur Vue ↔ Modèle
+├── main.py                    # Point d'entrée — page d'accueil
+├── language_manager.py        # Singleton de gestion de la langue (EN/FR)
+├── translations.py            # Dictionnaire complet des traductions
 ├── views/
-│   ├── home_view.py     # Hub de navigation principal
-│   ├── game_view.py     # Rendu graphique Canvas des allumettes
-│   └── training_view.py # Dashboard de contrôle de l'apprentissage
-├── AI_save_1.json       # Sauvegarde persistante agent 1
-├── AI_save_2.json       # Sauvegarde persistante agent 2
+│   └── home_view.py           # Hub de sélection des jeux
+├── games/
+│   ├── allumette/             # Jeu des Allumettes
+│   │   ├── main.py            # MatchstickGameApp + run_game()
+│   │   ├── game_model.py
+│   │   ├── game_controller.py
+│   │   ├── player.py          # Player (random), Human, AI (Q-Learning)
+│   │   └── views/
+│   │       ├── matchstick_menu_view.py
+│   │       ├── game_view.py
+│   │       └── training_view.py
+│   ├── cubee/                 # Cubee — jeu de territoire
+│   │   ├── main.py            # run_game()
+│   │   ├── game_model.py
+│   │   ├── game_controller.py
+│   │   ├── game_view.py
+│   │   └── player.py
+│   └── pixel_kart/            # Pixel Kart — jeu de course
+│       ├── main.py            # PixelKartApp + run_game()
+│       ├── game_model.py      # Circuit, Kart, Race + DTOs
+│       ├── game_controller.py
+│       ├── player.py          # Human, RandomAI
+│       ├── views/
+│       │   ├── menu_view.py   # Menu Play / Training
+│       │   └── race_view.py   # Course avec karts directionnels
+│       └── editor/            # Éditeur de circuits
+│           ├── map_editor.py
+│           ├── frames.py
+│           ├── map_dao.py
+│           └── circuits.txt   # Circuits sauvegardés
 └── requirements.txt
 ```
 
-### 1. Le Modèle (`game_model.py`, `player.py`)
-Encapsule l'état du système et les règles métier.
-- **`GameModel`** — Gère le stock d'allumettes et la validation des coups.
-- **`Player` & `AI`** — Définissent les comportements de décision, de l'aléatoire simple au Q-Learning complexe.
-
-### 2. La Vue (`views/`)
-Modules Tkinter indépendants pour une interface moderne et réactive.
-- **`home_view.py`** — Hub de navigation principal.
-- **`game_view.py`** — Rendu graphique dynamique des allumettes sur Canvas.
-- **`training_view.py`** — Dashboard de contrôle de l'apprentissage.
-
-### 3. Le Contrôleur (`game_controller.py`)
-Agit comme **médiateur**, interceptant les événements utilisateurs de la Vue pour mettre à jour le Modèle.
+### Conventions partagées
+- **MVC strict** : modèle, vue (Tkinter), contrôleur séparés dans tous les jeux
+- **Fenêtre unique par jeu** (`tk.Tk`) avec swap de frames pour la navigation
+- **Bouton Back en haut à gauche** de chaque vue pour revenir au menu ou à l'accueil
+- **Système multilingue** FR/EN via `LanguageManager` (pattern Observer)
+- **run_game()** : point d'entrée public de chaque module jeu
 
 ---
 
-## 🤖 Intelligence Artificielle & Apprentissage
-
-L'agent intelligent repose sur l'algorithme de **Q-Learning** (Reinforcement Learning).
-
-| Composant | Description |
-|-----------|-------------|
-| **V-Function** | Dictionnaire associant chaque état (nb d'allumettes) à une valeur de récompense attendue. |
-| **Politique ε-Greedy** | Alternance entre **Exploration** (coups aléatoires) et **Exploitation** (meilleures connaissances). |
-| **Apprentissage TD** | Valeurs mises à jour après chaque action en fonction du résultat (victoire / défaite). |
-| **Epsilon Decay** | Réduction progressive du taux d'exploration pour stabiliser la stratégie optimale. |
-
----
-
-## ⚙️ Guide d'Installation & Lancement
+## ⚙️ Guide d'installation & Lancement
 
 ### Prérequis
-- **Python 3.8+**
+- **Python 3.10+**
 - `tkinter` (inclus par défaut dans la plupart des distributions Python)
 
 ### Installation
@@ -109,8 +93,11 @@ L'agent intelligent repose sur l'algorithme de **Q-Learning** (Reinforcement Lea
 git clone https://github.com/VVZ-Data/Projet_IA.git
 cd Projet_IA
 
-# 2. Installation des dépendances de développement et lancement de l'environement
-.\env\Scripts\activate 
+# 2. Activation de l'environnement virtuel
+.\env\Scripts\activate          # Windows
+# source env/bin/activate       # Linux/macOS
+
+# 3. Installation des dépendances
 pip install -r requirements.txt
 ```
 
@@ -122,35 +109,66 @@ python main.py
 
 ---
 
-## 🎲 Manuel d'Utilisation
+## 🔥 Jeu des Allumettes
 
-### Navigation
-1. **Accueil** — Sélectionnez *"Jeu des Allumettes"*. Utilisez le bouton **EN/FR** pour changer la langue.
-2. **Menu** — Choisissez entre *"Jouer"* (immédiat) ou *"Entraîner"* (configuration).
+Variante **Misère du Jeu de Nim** : le joueur qui retire la dernière allumette **perd**.
 
-### Sessions d'Entraînement
+| Étape | Description |
+|-------|-------------|
+| **Initialisation** | 15 allumettes sur le plateau |
+| **Déroulement** | Chaque joueur retire 1, 2 ou 3 allumettes à tour de rôle |
+| **Victoire** | Le joueur qui prend la **dernière allumette perd** |
 
-Pour obtenir une IA imbattable, suivez ces recommandations :
+### Modes de jeu
+- **vs IA 1 / IA 2** — Affrontez une IA entraînée
+- **vs Random** — Mode détente contre un algorithme aléatoire
 
-| Paramètre | Valeur recommandée | Raison |
-|-----------|-------------------|--------|
-| **Nombre de parties** | ≥ 100 000 | Convergence assurée |
-| **Learning Rate** | `0.3` | Équilibre vitesse / stabilité |
-| **Epsilon Decay** | `5000` | Exploration suffisante en début d'entraînement |
-
-> **💾 Sauvegarde** — Les résultats ne sont persistés dans `AI_save_1` ou `AI_save_2` que sur **validation manuelle** après analyse des résultats.
+### Entraînement
+| Paramètre | Valeur recommandée |
+|-----------|-------------------|
+| Nombre de parties | ≥ 100 000 |
+| Learning Rate | `0.3` |
+| Epsilon Decay | `5000` |
 
 ---
 
-## 🧹 Qualité du Code & Standards
+## 🎮 Cubee
 
-| Standard | Détail |
-|----------|--------|
-| ✅ **Architecture MVC** | Découplage total logique / interface. |
-| ✅ **Pattern Singleton** | Gestion unique du `LanguageManager`. |
-| ✅ **Pattern Observer** | Notification automatique des changements de langue à toutes les vues actives. |
-| ✅ **Type Hinting** | Utilisation systématique des indices de type pour une meilleure robustesse. |
-| ✅ **Conformité PEP 8** | Code clair, nommé explicitement et documenté via Docstrings. |
+Jeu de territoire : deux joueurs se déplacent sur une grille et capturent des cases.
+
+### Mode de jeu
+- Humain vs IA (Q-Learning)
+- Contrôles : flèches du clavier ou pavé directionnel
+
+---
+
+## 🎲 Pixel Kart
+
+Course de karts sur une grille de pixels.  
+Chaque kart possède une **position**, une **direction** (N/E/S/O) et une **vitesse** (-1 à 2).
+
+### Règles
+| Terrain | Effet |
+|---------|-------|
+| 🟫 Route | Vitesse normale |
+| 🟩 Herbe | Vitesse divisée par 2 |
+| ⬛ Mur | Kart éliminé |
+| 🟨 Ligne d'arrivée | Doit être franchie vers l'**EST** pour compter un tour |
+
+**Actions disponibles par tour :** Accélérer · Freiner · Tourner gauche · Tourner droite · Passer
+
+### Modes de jeu
+- **vs IA** — Humain + IA random (IA Q-Learning prévue en V2)
+- **vs Humain** — Deux humains, chacun à son tour sur le même écran
+
+### Éditeur de circuits
+Accessible depuis le menu ou via "Open circuit editor".  
+Circuits disponibles : Basic, Large, Petit, Masque, Basic inverse, Large inverse.
+
+### Karts à l'écran
+Chaque kart est affiché avec :
+- Sa **couleur** unique (rouge, bleu, orange, violet…)
+- Sa **lettre initiale** + une **flèche directionnelle** (▲ ▶ ▼ ◀)
 
 ---
 

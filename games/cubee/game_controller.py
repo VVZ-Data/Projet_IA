@@ -26,7 +26,8 @@ class GameController:
         self,
         player1: Player,
         player2: Player,
-        size: int = 5
+        size: int = 5,
+        on_back=None,
     ) -> None:
         """
         Initialise le contrôleur, le modèle et la vue.
@@ -54,7 +55,7 @@ class GameController:
         player1.game = self.model
         player2.game = self.model
 
-        self.view = GameView(self)
+        self.view = GameView(self, on_back=on_back)
         self._refresh_view()
 
         # Déclencher l'IA si le premier joueur n'est pas humain
