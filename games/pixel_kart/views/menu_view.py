@@ -111,6 +111,18 @@ class PixelKartMenuView(Frame):
         )
         self.play_title.pack(pady=(20, 15))
 
+        self.solo_btn = tk.Button(
+            play_card,
+            text=lang_manager.get_text("pk_solo"),
+            font=("Helvetica", 14, "bold"),
+            bg=self.ACCENT_COLOR,
+            fg="white",
+            width=18,
+            pady=10,
+            command=lambda: self._on_play_clicked("solo")
+        )
+        self.solo_btn.pack(pady=8)
+
         self.vs_ai_btn = tk.Button(
             play_card,
             text=lang_manager.get_text("pk_vs_ai"),
@@ -248,6 +260,7 @@ class PixelKartMenuView(Frame):
         self.back_btn.config(text="← " + lang_manager.get_text("back"))
         self.title_label.config(text=lang_manager.get_text("pixel_kart_menu_title"))
         self.play_title.config(text="🎮 " + lang_manager.get_text("pk_play"))
+        self.solo_btn.config(text=lang_manager.get_text("pk_solo"))
         self.vs_ai_btn.config(text=lang_manager.get_text("pk_vs_ai"))
         self.vs_human_btn.config(text=lang_manager.get_text("pk_vs_human"))
         self.train_title.config(text="🤖 " + lang_manager.get_text("pk_training"))

@@ -68,7 +68,7 @@ class PixelKartApp(tk.Tk):
         """
         Crée une course en fonction de la config et affiche la vue de course.
 
-        config : {"mode": "ai"|"human", "circuit": str, "nb_turns": int}
+        config : {"mode": "solo"|"ai"|"human", "circuit": str, "nb_turns": int}
         """
         circuits = map_dao.get_all()
         raw = circuits.get(config["circuit"])
@@ -78,7 +78,9 @@ class PixelKartApp(tk.Tk):
 
         circuit = Circuit(name=config["circuit"], raw=raw)
 
-        if config["mode"] == "ai":
+        if config["mode"] == "solo":
+            karts = [Human("Bob")]
+        elif config["mode"] == "ai":
             karts = [Human("Bob"), RandomAI("Randy")]
         else:  # human vs human
             karts = [Human("Bob"), Human("Alice")]
