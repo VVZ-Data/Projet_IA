@@ -64,6 +64,9 @@ class Circuit:
     """
     Représente un circuit de course sous forme de grille.
 
+    Les lettres des cellules (R/G/W/F) sont centralisées dans
+    `editor/const.py:PIXEL_TYPES` pour éviter la duplication.
+
     Attributes:
         name (str): nom du circuit.
         grid (list[list[str]]): grille de cellules (lettres R/G/W/F).
@@ -72,10 +75,11 @@ class Circuit:
         finish_col (int): colonne de la ligne d'arrivée (verticale).
     """
 
-    LETTER_ROAD = "R"
-    LETTER_GRASS = "G"
-    LETTER_WALL = "W"
-    LETTER_FINISH = "F"
+    # Lettres issues de la configuration centrale des types de pixels
+    LETTER_ROAD = PIXEL_TYPES["ROAD"]["letter"]
+    LETTER_GRASS = PIXEL_TYPES["GRASS"]["letter"]
+    LETTER_WALL = PIXEL_TYPES["WALL"]["letter"]
+    LETTER_FINISH = PIXEL_TYPES["FINISH"]["letter"]
 
     def __init__(self, name: str, raw: str):
         self.name = name
@@ -94,12 +98,19 @@ class Circuit:
         self.finish_col = self.finish_positions[0][1] if self.finish_positions else 0
 
     def cell(self, row: int, col: int) -> str:
-        """Retourne la lettre de la cellule, ou 'W' si hors-grille."""
-        if 0 <= row < self.rows and 0 <= col < self.cols:
-            return self.grid[row][col]
-        return self.LETTER_WALL
+        """
+        Retourne la lettre de la cellule demandée.
+
+        La méthode `_move_kart` vérifie systématiquement `is_inside` avant
+        d'appeler `cell`, donc on se contente ici d'accéder à la grille.
+        Un `IndexError` remonte si l'appelant néglige la vérification :
+        c'est volontaire, cela révèle rapidement un bug côté appelant
+        plutôt que de masquer une sortie de grille.
+        """
+        return self.grid[row][col]
 
     def is_inside(self, row: int, col: int) -> bool:
+        """Vrai si (row, col) est une case valide de la grille."""
         return 0 <= row < self.rows and 0 <= col < self.cols
 
     def random_start(self) -> Tuple[int, int]:
@@ -139,6 +150,10 @@ class Kart:
         self.speed: int = 0
         self.turns_done: int = 0
         self.is_alive: bool = True
+        # Un tour n'est validé que si le kart est passé par le "checkpoint"
+        # (moitié opposée du circuit) avant de retraverser la ligne d'arrivée.
+        # Empêche l'exploit consistant à faire des allers-retours sur la ligne.
+        self.passed_checkpoint: bool = False
 
     def reset(self, start_position: Tuple[int, int]) -> None:
         """Place le kart au départ."""
@@ -147,6 +162,7 @@ class Kart:
         self.speed = 0
         self.turns_done = 0
         self.is_alive = True
+        self.passed_checkpoint = False
 
     def accelerate(self) -> None:
         if self.speed < self.MAX_SPEED:
@@ -208,51 +224,59 @@ class Race:
 
     def play_action(self, action: str) -> None:
         """
-        Applique une action au kart courant, puis fait avancer le kart,
-        et enfin passe au kart suivant.
+        Applique une action au kart courant, le fait avancer, puis passe
+        au prochain kart encore en jeu (vivant et n'ayant pas fini sa course).
         """
         kart = self.current_kart
-        if not kart.is_alive or self._kart_done(kart):
-            self._next_kart()
-            return
+        if kart.is_alive and not self._kart_done(kart):
+            # 1) Appliquer l'action choisie
+            if action == "ACCELERATE":
+                kart.accelerate()
+            elif action == "BRAKE":
+                kart.brake()
+            elif action == "TURN_LEFT":
+                kart.turn_left()
+            elif action == "TURN_RIGHT":
+                kart.turn_right()
+            # PASS ne change rien
 
-        # 1) Appliquer l'action choisie
-        if action == "ACCELERATE":
-            kart.accelerate()
-        elif action == "BRAKE":
-            kart.brake()
-        elif action == "TURN_LEFT":
-            kart.turn_left()
-        elif action == "TURN_RIGHT":
-            kart.turn_right()
-        # PASS ne change rien
+            # 2) Faire avancer le kart en fonction de sa vitesse et de sa direction
+            self._move_kart(kart)
 
-        # 2) Faire avancer le kart en fonction de sa vitesse et de sa direction
-        self._move_kart(kart)
-
-        # 3) Passer au kart suivant
-        self._next_kart()
+        # 3) Passer au prochain kart encore jouable
+        self._advance_to_next_playable()
 
     def _move_kart(self, kart: Kart) -> None:
         """
         Déplace le kart pas à pas selon sa vitesse :
-        - Sur l'herbe la vitesse est divisée par 2 (arrondie en dessous)
-        - Si le kart sort de la grille, sa vitesse est remise à 0
-        - Si le kart percute un mur, il est éliminé
-        - Si le kart franchit la ligne d'arrivée vers l'EST, on incrémente turns_done
+        - Sur l'herbe, la vitesse (en valeur absolue) est divisée par 2.
+        - Une vitesse positive déplace le kart dans sa direction.
+        - Une vitesse négative fait reculer le kart (direction opposée).
+        - Si le kart sort de la grille, sa vitesse est remise à 0.
+        - Si le kart percute un mur, il est éliminé.
+        - Le passage de la ligne d'arrivée vers l'EST n'incrémente
+          `turns_done` que si le kart a touché le checkpoint opposé.
         """
-        # Vitesse effective (herbe = vitesse / 2)
-        current_cell = self.circuit.cell(*kart.position)
-        effective_speed = kart.speed
-        if current_cell == Circuit.LETTER_GRASS and effective_speed > 0:
-            effective_speed = effective_speed // 2
-
-        if effective_speed <= 0:
-            # Pas de mouvement (la vitesse négative ne déplace pas en V1)
+        if kart.speed == 0:
             return
 
+        # Vitesse effective (herbe = |vitesse| / 2, arrondi vers zéro)
+        current_cell = self.circuit.cell(*kart.position)
+        magnitude = abs(kart.speed)
+        if current_cell == Circuit.LETTER_GRASS:
+            magnitude = magnitude // 2
+        if magnitude == 0:
+            return
+
+        # Sens du déplacement : en marche arrière on inverse le vecteur
         dr, dc = DIRECTIONS[kart.direction]
-        for _ in range(effective_speed):
+        if kart.speed < 0:
+            dr, dc = -dr, -dc
+
+        # Colonne servant de checkpoint (moitié opposée de la ligne d'arrivée)
+        checkpoint_col = (self.circuit.cols - 1) - self.circuit.finish_col
+
+        for _ in range(magnitude):
             new_r = kart.position[0] + dr
             new_c = kart.position[1] + dc
 
@@ -269,12 +293,19 @@ class Race:
                 kart.speed = 0
                 return
 
-            # Détection franchissement ligne d'arrivée vers l'EST
-            if (
-                kart.direction == "EAST"
+            # Franchissement de la ligne d'arrivée vers l'EST :
+            # ne valide un tour que si le kart est passé par le checkpoint.
+            crossing_east = (
+                kart.direction == "EAST" and kart.speed > 0
                 and kart.position[1] < self.circuit.finish_col <= new_c
-            ):
+            )
+            if crossing_east and kart.passed_checkpoint:
                 kart.turns_done += 1
+                kart.passed_checkpoint = False
+
+            # Validation du checkpoint (moitié opposée du circuit)
+            if abs(new_c - checkpoint_col) <= 1:
+                kart.passed_checkpoint = True
 
             kart.position = (new_r, new_c)
 
@@ -283,6 +314,20 @@ class Race:
         self.current_kart_index = (self.current_kart_index + 1) % len(self.karts)
         if self.current_kart_index == 0:
             self.time += 1
+
+    def _advance_to_next_playable(self) -> None:
+        """
+        Avance `current_kart_index` jusqu'au prochain kart encore jouable
+        (vivant et n'ayant pas terminé). S'arrête si la course est finie
+        pour éviter une boucle infinie.
+        """
+        for _ in range(len(self.karts)):
+            self._next_kart()
+            if self.is_finished():
+                return
+            kart = self.current_kart
+            if kart.is_alive and not self._kart_done(kart):
+                return
 
     def _kart_done(self, kart: Kart) -> bool:
         return kart.turns_done >= self.nb_turns

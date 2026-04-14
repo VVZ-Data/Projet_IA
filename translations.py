@@ -22,6 +22,7 @@ TRANSLATIONS = {
         "pixel_kart_menu_title": "Pixel Kart - Menu",
         "pk_play": "Play",
         "pk_training": "Training",
+        "pk_solo": "Solo",
         "pk_vs_ai": "vs AI",
         "pk_vs_human": "vs Human",
         "pk_settings": "Race settings",
@@ -43,6 +44,8 @@ TRANSLATIONS = {
         "pk_pass": "Pass",
         "pk_winner": "🏆 {} wins!",
         "pk_no_winner": "No winner — all karts crashed.",
+        "pk_race_over_title": "Race over",
+        "pk_race_over_crashed": "All karts crashed!",
 
         # Menu du jeu des allumettes
         "menu_title": "Matchstick Game - Menu",
@@ -103,6 +106,7 @@ TRANSLATIONS = {
         "pixel_kart_menu_title": "Pixel Kart - Menu",
         "pk_play": "Jouer",
         "pk_training": "Entraînement",
+        "pk_solo": "Solo",
         "pk_vs_ai": "contre IA",
         "pk_vs_human": "contre Humain",
         "pk_settings": "Paramètres de la course",
@@ -124,6 +128,8 @@ TRANSLATIONS = {
         "pk_pass": "Passer",
         "pk_winner": "🏆 {} gagne !",
         "pk_no_winner": "Aucun vainqueur — tous les karts ont crashé.",
+        "pk_race_over_title": "Course terminée",
+        "pk_race_over_crashed": "Tous les karts ont crashé !",
 
         # Menu du jeu des allumettes
         "menu_title": "Jeu des Allumettes - Menu",
