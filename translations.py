@@ -17,6 +17,26 @@ TRANSLATIONS = {
 
         # Menu cubee
         "cubee_menu_title": "Cubee",
+        "cubee_play": "Play",
+        "cubee_training": "Train AI",
+        "cubee_vs_ai": "vs AI",
+        "cubee_vs_random": "vs Random",
+        "cubee_vs_human": "vs Human",
+        "cubee_train_title": "Cubee - AI Training",
+        "cubee_train_nb_games": "Number of games:",
+        "cubee_train_gamma": "Gamma (γ):",
+        "cubee_train_alpha": "Learning rate (α):",
+        "cubee_train_epsilon": "Initial epsilon (ε):",
+        "cubee_train_opponent": "Opponent:",
+        "cubee_train_opponent_random": "Random",
+        "cubee_train_opponent_self": "Self-play (AI vs AI)",
+        "cubee_train_start": "Start Training",
+        "cubee_train_progress": "Progress",
+        "cubee_train_games_played": "Games played: {}/{}",
+        "cubee_train_complete": "Training Complete!",
+        "cubee_train_wins": "AI wins: {} ({}%)",
+        "cubee_train_losses": "Opponent wins: {} ({}%)",
+        "cubee_train_elapsed": "Elapsed time: {}s",
 
         # Menu pixelKart
         "pixel_kart_menu_title": "Pixel Kart - Menu",
@@ -101,6 +121,26 @@ TRANSLATIONS = {
 
         # Menu cubee
         "cubee_menu_title": "Cubee",
+        "cubee_play": "Jouer",
+        "cubee_training": "Entraîner l'IA",
+        "cubee_vs_ai": "contre IA",
+        "cubee_vs_random": "contre Random",
+        "cubee_vs_human": "contre Humain",
+        "cubee_train_title": "Cubee - Entraînement IA",
+        "cubee_train_nb_games": "Nombre de parties :",
+        "cubee_train_gamma": "Gamma (γ) :",
+        "cubee_train_alpha": "Taux d'apprentissage (α) :",
+        "cubee_train_epsilon": "Epsilon initial (ε) :",
+        "cubee_train_opponent": "Adversaire :",
+        "cubee_train_opponent_random": "Random",
+        "cubee_train_opponent_self": "Self-play (IA contre IA)",
+        "cubee_train_start": "Lancer l'entraînement",
+        "cubee_train_progress": "Progression",
+        "cubee_train_games_played": "Parties jouées : {}/{}",
+        "cubee_train_complete": "Entraînement terminé !",
+        "cubee_train_wins": "Victoires IA : {} ({}%)",
+        "cubee_train_losses": "Victoires adversaire : {} ({}%)",
+        "cubee_train_elapsed": "Temps écoulé : {}s",
 
         # Menu pixelKart
         "pixel_kart_menu_title": "Pixel Kart - Menu",
