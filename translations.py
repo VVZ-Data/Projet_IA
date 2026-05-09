@@ -67,6 +67,26 @@ TRANSLATIONS = {
         "pk_race_over_title": "Race over",
         "pk_race_over_crashed": "All karts crashed!",
 
+        # Pixel Kart - training
+        "pk_train_title": "Pixel Kart - AI Training",
+        "pk_train_run_name": "Run name:",
+        "pk_train_circuit": "Circuit:",
+        "pk_train_nb_turns": "Number of turns:",
+        "pk_train_episodes": "Episodes:",
+        "pk_train_gamma": "Gamma (γ):",
+        "pk_train_alpha": "Learning rate (α):",
+        "pk_train_epsilon_start": "Epsilon start:",
+        "pk_train_epsilon_end": "Epsilon end:",
+        "pk_train_start": "Start Training",
+        "pk_train_progress": "Training progress",
+        "pk_train_progress_label": "Episodes: {}/{}",
+        "pk_train_complete": "Training complete!",
+        "pk_train_finished_pct": "Episodes finished: {} ({}%)",
+        "pk_train_crashed_pct": "Crashes: {} ({}%)",
+        "pk_train_avg_reward": "Avg reward (last window): {}",
+        "pk_train_elapsed": "Elapsed: {}s",
+        "pk_train_no_circuit": "No circuit available — open the circuit editor first.",
+
         # Menu du jeu des allumettes
         "menu_title": "Matchstick Game - Menu",
         "play": "Play",
@@ -170,6 +190,26 @@ TRANSLATIONS = {
         "pk_no_winner": "Aucun vainqueur — tous les karts ont crashé.",
         "pk_race_over_title": "Course terminée",
         "pk_race_over_crashed": "Tous les karts ont crashé !",
+
+        # Pixel Kart - entraînement
+        "pk_train_title": "Pixel Kart - Entraînement IA",
+        "pk_train_run_name": "Nom du run :",
+        "pk_train_circuit": "Circuit :",
+        "pk_train_nb_turns": "Nombre de tours :",
+        "pk_train_episodes": "Épisodes :",
+        "pk_train_gamma": "Gamma (γ) :",
+        "pk_train_alpha": "Taux d'apprentissage (α) :",
+        "pk_train_epsilon_start": "Epsilon initial :",
+        "pk_train_epsilon_end": "Epsilon final :",
+        "pk_train_start": "Lancer l'entraînement",
+        "pk_train_progress": "Progression de l'entraînement",
+        "pk_train_progress_label": "Épisodes : {}/{}",
+        "pk_train_complete": "Entraînement terminé !",
+        "pk_train_finished_pct": "Épisodes terminés : {} ({}%)",
+        "pk_train_crashed_pct": "Crashs : {} ({}%)",
+        "pk_train_avg_reward": "Récompense moyenne (dernière fenêtre) : {}",
+        "pk_train_elapsed": "Durée : {}s",
+        "pk_train_no_circuit": "Aucun circuit disponible — ouvre l'éditeur de circuits.",
 
         # Menu du jeu des allumettes
         "menu_title": "Jeu des Allumettes - Menu",

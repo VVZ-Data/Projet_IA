@@ -45,10 +45,11 @@ class PixelKartMenuView(Frame):
     ACCENT_COLOR = "#E74C3C"
     DISABLED_BG = "#E8EDF2"
 
-    def __init__(self, master, on_play_selected=None, on_back=None):
+    def __init__(self, master, on_play_selected=None, on_train_selected=None, on_back=None):
         super().__init__(master, bg=self.BG_COLOR)
         self.master = master
         self.on_play_selected = on_play_selected
+        self.on_train_selected = on_train_selected
         self.on_back = on_back
 
         self.circuit_var = tk.StringVar()
@@ -148,27 +149,28 @@ class PixelKartMenuView(Frame):
         self.vs_human_btn.pack(pady=(8, 20))
 
     def _create_train_card(self, parent: Frame) -> None:
-        train_card = Frame(parent, bg=self.DISABLED_BG, relief=tk.FLAT, bd=3)
+        # Carte Training maintenant active : fond blanc, titre coloré, bouton cliquable
+        train_card = Frame(parent, bg=self.CARD_BG, relief=tk.RAISED, bd=3)
         train_card.grid(row=0, column=1, sticky="nsew", padx=(15, 0))
 
         self.train_title = tk.Label(
             train_card,
             text="🤖 " + lang_manager.get_text("pk_training"),
             font=("Helvetica", 22, "bold"),
-            bg=self.DISABLED_BG,
-            fg=self.DISABLED_TEXT
+            bg=self.CARD_BG,
+            fg=self.ACCENT_COLOR,
         )
         self.train_title.pack(pady=(20, 15))
 
-        self.coming_soon_label = tk.Label(
+        self.train_btn = tk.Button(
             train_card,
-            text=lang_manager.get_text("coming_soon"),
-            font=("Helvetica", 14, "italic"),
-            bg=self.DISABLED_BG,
-            fg=self.DISABLED_TEXT,
-            pady=20
+            text=lang_manager.get_text("pk_train_start"),
+            font=("Helvetica", 14, "bold"),
+            bg=self.ACCENT_COLOR, fg="white",
+            width=18, pady=10,
+            command=self._on_train_clicked,
         )
-        self.coming_soon_label.pack(pady=(8, 20))
+        self.train_btn.pack(pady=(20, 20))
 
     def _create_settings_panel(self) -> None:
         self.settings_frame = ttk.LabelFrame(
@@ -244,6 +246,11 @@ class PixelKartMenuView(Frame):
         if self.on_play_selected:
             self.on_play_selected(config)
 
+    def _on_train_clicked(self) -> None:
+        """Délègue le passage à la vue d'entraînement à l'application."""
+        if self.on_train_selected:
+            self.on_train_selected()
+
     def get_config(self) -> dict:
         try:
             nb_turns = int(self.turns_var.get())
@@ -264,7 +271,7 @@ class PixelKartMenuView(Frame):
         self.vs_ai_btn.config(text=lang_manager.get_text("pk_vs_ai"))
         self.vs_human_btn.config(text=lang_manager.get_text("pk_vs_human"))
         self.train_title.config(text="🤖 " + lang_manager.get_text("pk_training"))
-        self.coming_soon_label.config(text=lang_manager.get_text("coming_soon"))
+        self.train_btn.config(text=lang_manager.get_text("pk_train_start"))
         self.settings_frame.config(text=lang_manager.get_text("pk_settings"))
         self.circuit_label.config(text=lang_manager.get_text("pk_choose_circuit"))
         self.turns_label.config(text=lang_manager.get_text("pk_nb_turns"))
