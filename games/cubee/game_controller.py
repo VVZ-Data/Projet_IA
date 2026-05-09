@@ -24,6 +24,7 @@ class GameController:
 
     def __init__(
         self,
+        master,
         player1: Player,
         player2: Player,
         size: int = 5,
@@ -33,29 +34,24 @@ class GameController:
         Initialise le contrôleur, le modèle et la vue.
 
         Args:
+            master:  Fenêtre Tkinter parente dans laquelle insérer la vue.
             player1: Joueur 1 — instance de Player (IA) ou Human.
             player2: Joueur 2 — instance de Player (IA) ou Human.
             size:    Taille du plateau (par défaut 5).
+            on_back: Callback appelé par le bouton Back de la vue.
 
         Example:
             # Humain vs IA
-            GameController(Human("Alice"), Player("Bot")).run()
-
-            # IA vs IA
-            GameController(Player("Bot 1"), Player("Bot 2")).run()
-
-            # Humain vs Humain
-            GameController(Human("Alice"), Human("Bob")).run()
+            GameController(root, Human("Alice"), Player("Bot")).run()
         """
         self.players = {1: player1, 2: player2}
         self.model = GameModel(player1, player2, size)
-
 
         # Lier chaque joueur au modèle pour que play() fonctionne
         player1.game = self.model
         player2.game = self.model
 
-        self.view = GameView(self, on_back=on_back)
+        self.view = GameView(master, self, on_back=on_back)
         self._refresh_view()
 
         # Déclencher l'IA si le premier joueur n'est pas humain

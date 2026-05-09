@@ -8,9 +8,12 @@ from tkinter import messagebox
 from typing import Dict, List, Optional, Tuple
 
 
-class GameView(tk.Tk):
+class GameView(tk.Frame):
     """
     Interface graphique Tkinter du jeu Cubee.
+
+    Hérite de tk.Frame pour pouvoir être insérée dans une fenêtre parente
+    (CubeeApp) qui orchestre la navigation entre menu / partie / entraînement.
 
     Affiche le plateau (Canvas), les scores, l'indicateur de tour,
     les boutons de contrôle (New Game) et les flèches directionnelles.
@@ -37,20 +40,18 @@ class GameView(tk.Tk):
     EMOJI_P1     = "😊"
     EMOJI_P2     = "😞"
 
-    def __init__(self, controller, on_back=None) -> None:
+    def __init__(self, master, controller, on_back=None) -> None:
         """
-        Initialise la fenêtre principale et construit l'interface.
+        Initialise la frame du jeu et construit l'interface.
 
         Args:
+            master:     Fenêtre parente (CubeeApp).
             controller: Référence vers le GameController.
-            on_back   : callback optionnel appelé par le bouton Back en haut à gauche.
+            on_back:    Callback optionnel appelé par le bouton Back en haut à gauche.
         """
-        super().__init__()
+        super().__init__(master, bg=self.COLOR_BG)
         self.controller = controller
         self.on_back = on_back
-        self.title("Cubee — Territory Game")
-        self.configure(bg=self.COLOR_BG)
-        self.resizable(False, False)
 
         self._build_ui()
         self._bind_keys()
@@ -228,12 +229,28 @@ class GameView(tk.Tk):
     # ──────────────────────────────────────────────────────────────────────────
 
     def _bind_keys(self) -> None:
-        """Associe les touches du clavier aux actions du contrôleur."""
-        self.bind("<Up>",        lambda _e: self.controller.handle_move("up"))
-        self.bind("<Down>",      lambda _e: self.controller.handle_move("down"))
-        self.bind("<Left>",      lambda _e: self.controller.handle_move("left"))
-        self.bind("<Right>",     lambda _e: self.controller.handle_move("right"))
-        self.focus_set()
+        """
+        Associe les touches du clavier aux actions du contrôleur.
+
+        On utilise `bind_all` car la frame n'est pas focusable globalement :
+        les flèches doivent fonctionner peu importe où le focus se trouve
+        dans la fenêtre.
+        """
+        self.bind_all("<Up>",    lambda _e: self.controller.handle_move("up"))
+        self.bind_all("<Down>",  lambda _e: self.controller.handle_move("down"))
+        self.bind_all("<Left>",  lambda _e: self.controller.handle_move("left"))
+        self.bind_all("<Right>", lambda _e: self.controller.handle_move("right"))
+
+    def unbind_keys(self) -> None:
+        """
+        Détache les bindings clavier globaux.
+
+        À appeler par le contrôleur ou la fenêtre parente quand la vue
+        est sur le point d'être détruite, pour éviter que les anciennes
+        liaisons restent actives sur la nouvelle vue.
+        """
+        for key in ("<Up>", "<Down>", "<Left>", "<Right>"):
+            self.unbind_all(key)
 
     # ──────────────────────────────────────────────────────────────────────────
     # Méthodes de mise à jour appelées par le contrôleur
@@ -396,5 +413,10 @@ class GameView(tk.Tk):
     # ──────────────────────────────────────────────────────────────────────────
 
     def run(self) -> None:
-        """Lance la boucle principale Tkinter."""
-        self.mainloop()
+        """
+        Lance la boucle principale Tkinter via la fenêtre parente.
+
+        GameView étant une Frame, on délègue à `master.mainloop()`. Cette
+        méthode est conservée pour préserver l'API existante du contrôleur.
+        """
+        self.master.mainloop()

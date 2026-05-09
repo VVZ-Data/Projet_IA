@@ -58,6 +58,70 @@ def testing(*ais, nb_games):
 
         print(f"{wins/nb_games*100:.2f}%")
 
+def train_with_progress(student, opponent, nb_games, size=5, progress_callback=None,
+                        progress_step=200):
+    """
+    Lance un entraînement d'une IA contre un adversaire avec retour de progression.
+
+    Cette variante de `training()` est destinée à être appelée depuis l'UI :
+    elle prend un `progress_callback(current, total)` invoqué périodiquement
+    pour rafraîchir la barre de progression Tkinter.
+
+    Args:
+        student: IA en cours d'apprentissage (instance de AI).
+        opponent: Adversaire (Player aléatoire ou autre IA).
+        nb_games: Nombre total de parties à jouer.
+        size: Taille du plateau Cubee (défaut 5).
+        progress_callback: Fonction(current: int, total: int). Si None, pas
+            de retour visuel. Appelée toutes les `progress_step` parties et
+            une dernière fois à la fin.
+        progress_step: Intervalle (en parties) entre deux callbacks. Plus
+            l'intervalle est petit, plus l'UI reste fluide mais plus c'est lent.
+
+    Returns:
+        Tuple (wins, losses, draws) du student après l'entraînement.
+    """
+    nb_epsilon = max(1, int(nb_games / _NB_STEPS))
+    ais_with_qtable = [a for a in (student, opponent) if hasattr(a, 'q_table') and a.q_table is not None]
+    commit_interval = max(1000, nb_games // 10)
+
+    training_game = GameModel(student, opponent, size, displayable=False)
+
+    # Réinitialiser les compteurs pour ne mesurer que ce run
+    for player in (student, opponent):
+        player.nb_wins = 0
+        player.nb_loses = 0
+        player.nb_draws = 0
+
+    for i in range(nb_games):
+        # Décroissance d'epsilon (exploration → exploitation)
+        if i % nb_epsilon == 0 and i > 0:
+            if hasattr(student, 'next_epsilon'):
+                student.next_epsilon()
+            if hasattr(opponent, 'next_epsilon'):
+                opponent.next_epsilon()
+
+        training_game.play()
+        training_game.reset()
+
+        # Commit périodique pour persister la Q-table sans saturer la DB
+        if i % commit_interval == 0 and i > 0:
+            for ai in ais_with_qtable:
+                ai.q_table.commit()
+
+        # Callback UI périodique
+        if progress_callback is not None and (i % progress_step == 0):
+            progress_callback(i, nb_games)
+
+    # Commit final + callback final pour atteindre 100%
+    for ai in ais_with_qtable:
+        ai.q_table.commit()
+    if progress_callback is not None:
+        progress_callback(nb_games, nb_games)
+
+    return student.nb_wins, student.nb_loses, student.nb_draws
+
+
 def train_ai(*ais, nb_games):
 
     nb_epsilon = int(nb_games / _NB_STEPS)
