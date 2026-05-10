@@ -333,7 +333,17 @@ class Race:
         return kart.turns_done >= self.nb_turns
 
     def is_finished(self) -> bool:
-        """La course est finie si tous les karts ont fini ou sont morts."""
+        """
+        Détermine si la course est terminée.
+
+        Deux conditions de fin :
+        - Au moins un kart vivant a complété tous ses tours → il a gagné,
+          la course gèle pour tout le monde (les autres ne peuvent plus jouer).
+        - Tous les karts sont soit morts soit ont terminé → personne ne peut
+          plus avancer.
+        """
+        if any(kart.is_alive and self._kart_done(kart) for kart in self.karts):
+            return True
         return all(
             (not kart.is_alive) or self._kart_done(kart)
             for kart in self.karts
