@@ -150,10 +150,6 @@ class Kart:
         self.speed: int = 0
         self.turns_done: int = 0
         self.is_alive: bool = True
-        # Un tour n'est validé que si le kart est passé par le "checkpoint"
-        # (moitié opposée du circuit) avant de retraverser la ligne d'arrivée.
-        # Empêche l'exploit consistant à faire des allers-retours sur la ligne.
-        self.passed_checkpoint: bool = False
 
     def reset(self, start_position: Tuple[int, int]) -> None:
         """Place le kart au départ."""
@@ -162,7 +158,6 @@ class Kart:
         self.speed = 0
         self.turns_done = 0
         self.is_alive = True
-        self.passed_checkpoint = False
 
     def accelerate(self) -> None:
         if self.speed < self.MAX_SPEED:
@@ -254,8 +249,16 @@ class Race:
         - Une vitesse négative fait reculer le kart (direction opposée).
         - Si le kart sort de la grille, sa vitesse est remise à 0.
         - Si le kart percute un mur, il est éliminé.
-        - Le passage de la ligne d'arrivée vers l'EST n'incrémente
-          `turns_done` que si le kart a touché le checkpoint opposé.
+        - Détection des franchissements de la ligne d'arrivée :
+            * passage vers l'EST (col_avant < finish_col <= col_après)
+              → `turns_done += 1`
+            * passage vers l'OUEST (col_après <= finish_col < col_avant)
+              → `turns_done -= 1` (le malus de récompense est appliqué
+              dans `ai_state.compute_reward` via la diff `turns_done`).
+
+        Seul le mouvement effectif compte : on n'utilise plus la direction
+        du kart car un kart à vitesse négative se déplace dans le sens
+        opposé à `kart.direction`.
         """
         if kart.speed == 0:
             return
@@ -268,13 +271,10 @@ class Race:
         if magnitude == 0:
             return
 
-        # Sens du déplacement : en marche arrière on inverse le vecteur
+        # Sens réel du déplacement : en marche arrière on inverse le vecteur
         dr, dc = DIRECTIONS[kart.direction]
         if kart.speed < 0:
             dr, dc = -dr, -dc
-
-        # Colonne servant de checkpoint (moitié opposée de la ligne d'arrivée)
-        checkpoint_col = (self.circuit.cols - 1) - self.circuit.finish_col
 
         for _ in range(magnitude):
             new_r = kart.position[0] + dr
@@ -293,19 +293,19 @@ class Race:
                 kart.speed = 0
                 return
 
-            # Franchissement de la ligne d'arrivée vers l'EST :
-            # ne valide un tour que si le kart est passé par le checkpoint.
-            crossing_east = (
-                kart.direction == "EAST" and kart.speed > 0
-                and kart.position[1] < self.circuit.finish_col <= new_c
-            )
-            if crossing_east and kart.passed_checkpoint:
-                kart.turns_done += 1
-                kart.passed_checkpoint = False
+            # Détection des franchissements de la ligne d'arrivée.
+            # Les conditions sont symétriques : EST = entrer dans la moitié
+            # droite, OUEST = entrer dans la moitié gauche. La case F elle-même
+            # est considérée du côté droit (>= finish_col), ce qui évite le
+            # double-comptage quand le kart démarre déjà sur la ligne.
+            old_c = kart.position[1]
+            crossing_east = old_c < self.circuit.finish_col <= new_c
+            crossing_west = new_c < self.circuit.finish_col <= old_c
 
-            # Validation du checkpoint (moitié opposée du circuit)
-            if abs(new_c - checkpoint_col) <= 1:
-                kart.passed_checkpoint = True
+            if crossing_east:
+                kart.turns_done += 1
+            elif crossing_west:
+                kart.turns_done -= 1
 
             kart.position = (new_r, new_c)
 

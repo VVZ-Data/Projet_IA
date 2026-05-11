@@ -256,6 +256,10 @@ def compute_timeout(circuit: Circuit, nb_turns: int) -> int:
     return max(500, count_road_cells(circuit) * nb_turns * 3)
 
 
+_REVERSE_FINISH_PENALTY: float = 30.0
+"""Malus appliqué à chaque franchissement de la ligne d'arrivée à contresens."""
+
+
 def compute_reward(
     kart_before: KartDTO,
     kart_after: KartDTO,
@@ -267,9 +271,15 @@ def compute_reward(
     Calcule la récompense entre l'état avant et l'état après une action.
 
     En cas de crash, la récompense est terminale (-100) et aucune autre
-    composante n'est ajoutée. Sinon, on cumule la récompense par tic
-    (coût temps + bonus vitesse + malus terrain) et un éventuel bonus
-    de tour si `turns_done` a augmenté.
+    composante n'est ajoutée. Sinon, on cumule :
+    - la récompense par tic (coût temps + bonus vitesse + malus terrain)
+    - un bonus de tour si `turns_done` a augmenté (franchissement EST normal)
+    - un malus de -30 par tour "perdu" si `turns_done` a diminué
+      (franchissement OUEST, à contresens)
+
+    Le malus `turns_diff * 30` se généralise au cas théorique où plusieurs
+    franchissements à contresens arriveraient dans le même tic (vitesse
+    élevée et ligne traversée plusieurs fois).
 
     Args:
         kart_before: État du kart avant l'action.
@@ -286,7 +296,12 @@ def compute_reward(
 
     reward = _tick_reward(kart_after, circuit)
 
-    if kart_after.turns_done > kart_before.turns_done:
+    turns_diff = kart_after.turns_done - kart_before.turns_done
+    if turns_diff > 0:
         reward += _lap_bonus(kart_after.turns_done, nb_turns_total)
+    elif turns_diff < 0:
+        # Franchissement à contresens : turns_diff est négatif,
+        # le produit reste donc négatif et applique un malus.
+        reward += turns_diff * _REVERSE_FINISH_PENALTY
 
     return reward

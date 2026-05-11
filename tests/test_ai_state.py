@@ -257,6 +257,26 @@ def test_reward_lap2_on_2_turn_race_is_final() -> None:
     assert reward == pytest.approx(199.5)
 
 
+def test_reward_reverse_finish_applies_penalty() -> None:
+    """Franchissement de la ligne à contresens : -30 en plus du tic."""
+    circuit = _make_circuit(["RRR"])
+    before = _make_kart_dto(position=(0, 1), speed=1, turns_done=0)
+    after = _make_kart_dto(position=(0, 0), speed=1, turns_done=-1)
+    reward = compute_reward(before, after, circuit, nb_turns_total=3, crashed=False)
+    # tic = -0.5 + 0.5 (speed 1) + 0 = 0 ; malus = -30
+    assert reward == pytest.approx(-30.0)
+
+
+def test_reward_double_reverse_doubles_penalty() -> None:
+    """Cas théorique : deux franchissements OUEST dans le même tic = -60."""
+    circuit = _make_circuit(["RRR"])
+    before = _make_kart_dto(position=(0, 1), speed=0, turns_done=2)
+    after = _make_kart_dto(position=(0, 0), speed=0, turns_done=0)
+    reward = compute_reward(before, after, circuit, nb_turns_total=3, crashed=False)
+    # tic = -0.5 + 0 + 0 ; malus = (-2) * 30 = -60
+    assert reward == pytest.approx(-60.5)
+
+
 # ──────────────────────────────────────────────────────────────────────────
 # Encodage des actions
 # ──────────────────────────────────────────────────────────────────────────
