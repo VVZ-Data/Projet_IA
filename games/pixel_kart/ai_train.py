@@ -36,6 +36,15 @@ from games.pixel_kart.player import QLearningAI
 FLUSH_INTERVAL: int = 500
 """Nombre d'épisodes entre deux flushes en base (Q-values + logs)."""
 
+TIMEOUT_PENALTY: float = -500.0
+"""
+Malus appliqué quand un épisode se termine par timeout (boucle ou stagnation).
+
+Volontairement plus fort que le crash (-100) : crasher peut résulter d'une
+tentative légitime d'aller vite, tandis que tourner en rond sans finir est
+la pire politique possible.
+"""
+
 
 # ──────────────────────────────────────────────────────────────────────────
 # Création / récupération d'un run
@@ -196,6 +205,11 @@ def run_episode(
     L'épisode s'arrête si la course est finie, si le kart crashe, ou si le
     nombre de tics atteint le `timeout` (anti-boucle infinie).
 
+    Cas timeout sans victoire ni crash : on applique `TIMEOUT_PENALTY` à la
+    dernière transition mémorisée. Sans ce signal, l'IA peut converger vers
+    une politique de stagnation (tourner en rond accumule du tic_reward
+    légèrement positif sans risque) qui ne finit jamais la course.
+
     Args:
         ai_kart: Agent à entraîner (déjà construit, branché à un repository).
         circuit: Circuit en cours.
@@ -249,4 +263,11 @@ def run_episode(
             break
 
     finished = race.is_finished() and not crashed
+
+    # Timeout sans victoire ni crash : pénaliser la stagnation pour que
+    # l'IA n'apprenne pas à tourner en rond.
+    if not finished and not crashed:
+        total_reward += TIMEOUT_PENALTY
+        ai_kart.update_q(TIMEOUT_PENALTY, "", terminal=True)
+
     return total_reward, ticks, finished, crashed
