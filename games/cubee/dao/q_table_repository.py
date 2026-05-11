@@ -50,6 +50,15 @@ class QTableRepo:
         return 0.0
 
     def update_q_value(self, gama, learning_rate, state, action, new_value):
+        """
+        Met à jour la Q-value en mémoire (et en base si la session le décide).
+
+        Note de perf : on n'appelle PAS `session.flush()` ici. Sur un entraînement
+        de plusieurs dizaines de milliers de parties, un flush par update génère
+        des millions d'écritures disque (SQLite fsync) et ralentit fortement le
+        training. Les modifications sont écrites en base lors du `commit()`
+        périodique appelé depuis la boucle d'entraînement (`ai_train.py`).
+        """
         key = (str(gama), str(learning_rate), state)
         row = self.cache.get(key) or self.session.get(QTable, key)
         if row:
@@ -59,7 +68,6 @@ class QTableRepo:
             new_row = QTable(gama=str(gama), learning_rate=str(learning_rate), state=state, **{f"action_{action}": new_value})
             self.session.add(new_row)
             self.cache[key] = new_row
-        self.session.flush()
 
     def commit(self):
         self.session.commit()

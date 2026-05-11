@@ -14,7 +14,7 @@ Les karts sont visuellement distinguables :
 """
 
 import tkinter as tk
-from tkinter import Frame, ttk
+from tkinter import Frame, messagebox, ttk
 
 from language_manager import lang_manager
 from games.pixel_kart.editor.frames import CircuitFrame
@@ -169,6 +169,7 @@ class PixelKartRaceView(Frame):
         self.on_action = on_action
         self.on_back = on_back
 
+        self._end_message_shown = False
         lang_manager.register_observer(self)
         self._build_ui()
 
@@ -285,15 +286,19 @@ class PixelKartRaceView(Frame):
             controllable = not kart.is_ai
             self.kart_frames[idx].update_kart(kart.to_dto(), active, controllable)
 
-        # Statut de fin
+        # Statut de fin + popup (une seule fois)
         if race.is_finished():
             winner = race.winner()
             if winner is None:
-                self.status_label.config(text=lang_manager.get_text("pk_no_winner"))
+                msg = lang_manager.get_text("pk_no_winner")
             else:
-                self.status_label.config(
-                    text=lang_manager.get_text("pk_winner").format(winner.name)
-                )
+                msg = lang_manager.get_text("pk_winner").format(winner.name)
+            self.status_label.config(text=msg)
+            if not self._end_message_shown:
+                self._end_message_shown = True
+                self.after(200, lambda m=msg: messagebox.showinfo(
+                    lang_manager.get_text("pk_race_over_title"), m, parent=self
+                ))
         else:
             self.status_label.config(text="")
 
