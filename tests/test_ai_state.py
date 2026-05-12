@@ -221,14 +221,14 @@ def test_reward_speed_0_on_grass_is_minus_2_5() -> None:
     assert reward == pytest.approx(-2.5)
 
 
-def test_reward_crash_is_minus_1000_only() -> None:
+def test_reward_crash_is_minus_200_only() -> None:
     circuit = _make_circuit(["RRR"])
     before = _make_kart_dto(position=(0, 0), speed=2)
     after = _make_kart_dto(position=(0, 1), speed=0, is_alive=False)
     reward = compute_reward(before, after, circuit, nb_turns_total=3, crashed=True)
-    # Crash terminal : -1000, pas d'autre composante.
-    # Renforcé de -100 à -1000 pour que crasher reste pire que timeout (-500).
-    assert reward == -1000.0
+    # Crash terminal : -200 (pénalité claire mais sans paralyser l'IA).
+    # Le timeout (-2000 côté ai_train) reste strictement pire.
+    assert reward == -200.0
 
 
 def test_reward_first_lap_on_3_turn_race() -> None:
@@ -326,3 +326,51 @@ def test_compute_timeout_multiplies_by_nb_turns() -> None:
     circuit = _make_circuit(["R" * 200])
     # 200 * 5 * 3 = 3000
     assert compute_timeout(circuit, nb_turns=5) == 3000
+
+
+# ──────────────────────────────────────────────────────────────────────────
+# Reward shaping (heat-map)
+# ──────────────────────────────────────────────────────────────────────────
+
+
+def test_shaping_positive_when_progressing_toward_finish() -> None:
+    """
+    Sur un circuit avec F, avancer d'une case dans le bon sens (distance
+    qui baisse) doit donner un bonus de shaping positif.
+    """
+    circuit = _make_circuit(["RRFRR"])
+    # (0,0) a dist=2, (0,1) a dist=1 → shaping = 2-1 = +1
+    before = _make_kart_dto(position=(0, 0), speed=1)
+    after = _make_kart_dto(position=(0, 1), speed=1)
+    reward = compute_reward(before, after, circuit, nb_turns_total=3, crashed=False)
+    # tic = -0.5 + 0.1 (speed 1) + 0 = -0.4 ; shaping = +1 ; total = +0.6
+    assert reward == pytest.approx(0.6)
+
+
+def test_shaping_negative_when_going_backwards() -> None:
+    """Reculer (distance qui augmente) donne un malus de shaping."""
+    circuit = _make_circuit(["RRFRR"])
+    before = _make_kart_dto(position=(0, 1), speed=1)
+    after = _make_kart_dto(position=(0, 0), speed=1)
+    reward = compute_reward(before, after, circuit, nb_turns_total=3, crashed=False)
+    # tic = -0.4 ; shaping = 1-2 = -1 ; total = -1.4
+    assert reward == pytest.approx(-1.4)
+
+
+def test_shaping_zero_when_circuit_has_no_finish() -> None:
+    """Sans heat-map (pas de F), aucun shaping appliqué (compatibilité)."""
+    circuit = _make_circuit(["RRR"])
+    before = _make_kart_dto(position=(0, 0), speed=1)
+    after = _make_kart_dto(position=(0, 1), speed=1)
+    reward = compute_reward(before, after, circuit, nb_turns_total=3, crashed=False)
+    # tic = -0.4 ; pas de shaping car distance_map vide
+    assert reward == pytest.approx(-0.4)
+
+
+def test_shaping_not_applied_on_crash() -> None:
+    """Sur un crash, seule la pénalité -200 compte (pas de shaping)."""
+    circuit = _make_circuit(["RRFRR"])
+    before = _make_kart_dto(position=(0, 0), speed=2)
+    after = _make_kart_dto(position=(0, 1), speed=0, is_alive=False)
+    reward = compute_reward(before, after, circuit, nb_turns_total=3, crashed=True)
+    assert reward == -200.0

@@ -173,13 +173,21 @@ def _lap_bonus(turn_just_done: int, nb_turns_total: int) -> float:
     La récompense croît avec l'avancement : finir le dernier tour vaut
     toujours +200, tandis qu'un tour intermédiaire vaut moins.
 
+    Cas turn_just_done <= 0 : aucune récompense. Ce cas correspond à un
+    retour à 0 ou en territoire négatif après des franchissements à
+    contresens — il n'y a pas eu de PROGRÈS réel à récompenser. Sans ce
+    garde-fou, le fall-through `return 200.0` du bloc nb_turns >= 3
+    récompensait absurdement la sortie d'un état négatif.
+
     Args:
-        turn_just_done: Numéro du tour qui vient d'être validé (>=1).
+        turn_just_done: Numéro du tour qui vient d'être validé.
         nb_turns_total: Nombre total de tours à effectuer pour finir.
 
     Returns:
-        Récompense flottante (toujours positive).
+        Récompense flottante (positive ou nulle).
     """
+    if turn_just_done <= 0:
+        return 0.0
     if nb_turns_total == 1:
         return 200.0
     if nb_turns_total == 2:
@@ -190,6 +198,56 @@ def _lap_bonus(turn_just_done: int, nb_turns_total: int) -> float:
     if turn_just_done == 2:
         return 100.0
     return 200.0
+
+
+# ──────────────────────────────────────────────────────────────────────────
+# Reward shaping (heat-map)
+# ──────────────────────────────────────────────────────────────────────────
+
+SHAPING_SCALE: float = 1.0
+"""
+Échelle du potential-based reward shaping (Ng, Harada & Russell, 1999).
+
+À chaque tic non-terminal :
+    shaping = (dist_avant - dist_après) * SHAPING_SCALE
+
+dist_avant et dist_après sont lues dans `circuit.distance_map`. Avancer
+vers la ligne d'arrivée (distance qui baisse) donne un bonus positif,
+reculer donne un malus.
+
+Propriété mathématique importante : sur une politique optimale, le total
+des shaping rewards d'un épisode tend vers 0, ce qui garantit que la
+politique optimale n'est PAS modifiée par cet ajout. Le shaping accélère
+seulement l'apprentissage en fournissant un signal dense.
+"""
+
+_MAX_DIST_FALLBACK: int = 10_000
+"""
+Valeur retournée par `distance_map.get(pos, _MAX_DIST_FALLBACK)` quand
+une position n'est pas dans le map (mur, hors-grille, case isolée). En
+pratique, le kart n'occupe jamais ces cases (il aurait crashé), donc ce
+fallback ne devrait pas servir.
+"""
+
+
+def _shaping_reward(kart_before: KartDTO, kart_after: KartDTO, circuit: Circuit) -> float:
+    """
+    Récompense de shaping basée sur la différence de distance à l'arrivée.
+
+    Args:
+        kart_before: Position avant l'action.
+        kart_after: Position après l'action.
+        circuit: Circuit (utilise `circuit.distance_map`).
+
+    Returns:
+        (dist_before - dist_after) * SHAPING_SCALE, ou 0.0 si pas de map.
+    """
+    distance_map = getattr(circuit, "distance_map", None)
+    if not distance_map:
+        return 0.0
+    dist_before = distance_map.get(kart_before.position, _MAX_DIST_FALLBACK)
+    dist_after = distance_map.get(kart_after.position, _MAX_DIST_FALLBACK)
+    return (dist_before - dist_after) * SHAPING_SCALE
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -297,13 +355,15 @@ def compute_reward(
         Récompense flottante (peut être négative ou positive).
     """
     if crashed:
-        # -1000 (et non -100) pour garantir que crasher reste pire que
-        # le malus de timeout (-500). Avant ce changement, l'IA pouvait
-        # rationnellement préférer un crash à un timeout, ce qui menait
-        # à des taux de crash > 95 %.
-        return -1000.0
+        # -200 : pénalité substantielle, mais sans paralyser l'IA. Avec
+        # -1000 (ancienne valeur) le crash devenait tellement catastrophique
+        # comparé aux gains positifs rares que l'IA convergeait sur "ne
+        # rien faire" (PASS). Avec -200 elle accepte de prendre des risques
+        # raisonnables, et le timeout (-2000 côté ai_train) reste pire.
+        return -200.0
 
     reward = _tick_reward(kart_after, circuit)
+    reward += _shaping_reward(kart_before, kart_after, circuit)
 
     turns_diff = kart_after.turns_done - kart_before.turns_done
     if turns_diff > 0:

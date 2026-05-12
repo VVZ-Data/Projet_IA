@@ -113,11 +113,11 @@ def test_no_timeout_penalty_on_crash(
 
     assert crashed is True
     assert finished is False
-    # La récompense du crash est -1000. Le malus de stagnation (-500) ne
-    # doit PAS s'y ajouter (sinon total descendrait vers -1500).
-    assert total_reward == pytest.approx(-1000.0, abs=10.0)
-    # Vérification explicite que le malus timeout n'a pas été appliqué :
-    # avec timeout en plus on serait <= -1500, donc on doit rester au-dessus.
-    assert total_reward > -1000.0 + TIMEOUT_PENALTY + 10, (
+    # La récompense du crash est -200. Le malus de stagnation (-2000) ne
+    # doit PAS s'y ajouter (sinon total descendrait vers -2200).
+    assert total_reward == pytest.approx(-200.0, abs=10.0)
+    # Vérification explicite que TIMEOUT_PENALTY n'a pas été appliqué :
+    # avec lui en plus on serait à -2200.
+    assert total_reward > -200.0 + TIMEOUT_PENALTY + 10, (
         "Le malus timeout ne doit pas être appliqué après un crash"
     )

@@ -36,13 +36,18 @@ from games.pixel_kart.player import QLearningAI
 FLUSH_INTERVAL: int = 500
 """Nombre d'épisodes entre deux flushes en base (Q-values + logs)."""
 
-TIMEOUT_PENALTY: float = -500.0
+TIMEOUT_PENALTY: float = -2000.0
 """
 Malus appliqué quand un épisode se termine par timeout (boucle ou stagnation).
 
-Volontairement plus fort que le crash (-100) : crasher peut résulter d'une
-tentative légitime d'aller vite, tandis que tourner en rond sans finir est
-la pire politique possible.
+Volontairement strictement pire que le crash (-200, cf. ai_state) :
+- Crash : -200 → pénalisation correcte mais sans paralyser
+- Timeout : -2000 → la pire issue possible
+
+Sans cette hiérarchie (timeout > crash en valeur absolue) l'IA converge
+sur "ne rien faire" : moins risqué qu'agir, mais inutile pour finir une
+course. C'est exactement ce qu'on observait avec timeout=-500 :
+l'IA apprenait à stagner.
 """
 
 

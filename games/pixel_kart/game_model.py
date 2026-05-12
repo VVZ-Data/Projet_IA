@@ -8,8 +8,9 @@ Architecture MVC :
 """
 
 import random
+from collections import deque
 from dataclasses import dataclass, field
-from typing import List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional
 
 from games.pixel_kart.editor.const import PIXEL_TYPES
 
@@ -96,6 +97,68 @@ class Circuit:
         ]
         # On suppose une ligne d'arrivée verticale (toutes les F sur la même colonne)
         self.finish_col = self.finish_positions[0][1] if self.finish_positions else 0
+        # Pré-calcul de la heat-map de distance à l'arrivée (utilisé par le
+        # reward shaping). Pas de coût récurrent : un seul flood-fill au
+        # chargement du circuit, lookup O(1) ensuite.
+        self.distance_map: Dict[Tuple[int, int], int] = self._compute_distance_map()
+
+    def _compute_distance_map(self) -> Dict[Tuple[int, int], int]:
+        """
+        [IA-Claude] Calcule une heat-map de distance à la ligne d'arrivée.
+
+        Méthode : BFS (flood fill) à 4 connexités, source = les cases route
+        immédiatement à l'OUEST de chaque case F. Les cases F et les murs
+        sont traités comme des obstacles infranchissables par le BFS, ce
+        qui force le chemin à faire le tour complet du circuit : ainsi
+        une case juste à l'EST de F a une distance ÉLEVÉE (il faut faire
+        un tour pour la rejoindre par la voie correcte), et une case
+        juste à l'OUEST de F a une distance FAIBLE (1).
+
+        Les cases F elles-mêmes reçoivent la distance 0 (le but).
+
+        Returns:
+            Dict (row, col) → distance entière. Les cases inatteignables
+            (murs, herbe entourée de murs, etc.) ne sont PAS dans le dict :
+            l'appelant doit utiliser `.get(pos, MAX_DIST)` avec un fallback.
+        """
+        distance_map: Dict[Tuple[int, int], int] = {}
+        if not self.finish_positions:
+            return distance_map
+
+        # F = 0 (but atteint)
+        for pos in self.finish_positions:
+            distance_map[pos] = 0
+
+        # Sources du BFS : les cases route immédiatement à l'ouest des F
+        queue: deque = deque()
+        for r, c in self.finish_positions:
+            west = (r, c - 1)
+            if not self.is_inside(*west):
+                continue
+            west_cell = self.grid[west[0]][west[1]]
+            if west_cell in (self.LETTER_WALL, self.LETTER_FINISH):
+                continue
+            if west not in distance_map:
+                distance_map[west] = 1
+                queue.append(west)
+
+        # BFS 4-connexités. F et murs sont des obstacles, l'herbe est franchissable.
+        while queue:
+            r, c = queue.popleft()
+            d = distance_map[(r, c)]
+            for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+                nr, nc = r + dr, c + dc
+                if not self.is_inside(nr, nc):
+                    continue
+                next_cell = self.grid[nr][nc]
+                if next_cell in (self.LETTER_WALL, self.LETTER_FINISH):
+                    continue
+                if (nr, nc) in distance_map:
+                    continue
+                distance_map[(nr, nc)] = d + 1
+                queue.append((nr, nc))
+
+        return distance_map
 
     def cell(self, row: int, col: int) -> str:
         """
