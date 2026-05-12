@@ -203,13 +203,13 @@ def test_east_facing_right_is_south() -> None:
 # ──────────────────────────────────────────────────────────────────────────
 
 
-def test_reward_speed_2_on_road_is_one() -> None:
+def test_reward_speed_2_on_road() -> None:
     circuit = _make_circuit(["RRR"])
     before = _make_kart_dto(position=(0, 0), speed=1)
     after = _make_kart_dto(position=(0, 1), speed=2)
     reward = compute_reward(before, after, circuit, nb_turns_total=3, crashed=False)
-    # -0.5 (tic) + 1.5 (speed 2) + 0 (route) = 1.0
-    assert reward == pytest.approx(1.0)
+    # -0.5 (tic) + 0.2 (speed 2 réduit) + 0 (route) = -0.3
+    assert reward == pytest.approx(-0.3)
 
 
 def test_reward_speed_0_on_grass_is_minus_2_5() -> None:
@@ -221,13 +221,14 @@ def test_reward_speed_0_on_grass_is_minus_2_5() -> None:
     assert reward == pytest.approx(-2.5)
 
 
-def test_reward_crash_is_minus_100_only() -> None:
+def test_reward_crash_is_minus_1000_only() -> None:
     circuit = _make_circuit(["RRR"])
     before = _make_kart_dto(position=(0, 0), speed=2)
     after = _make_kart_dto(position=(0, 1), speed=0, is_alive=False)
     reward = compute_reward(before, after, circuit, nb_turns_total=3, crashed=True)
-    # Crash terminal : pas de tic, pas d'autre composante
-    assert reward == -100.0
+    # Crash terminal : -1000, pas d'autre composante.
+    # Renforcé de -100 à -1000 pour que crasher reste pire que timeout (-500).
+    assert reward == -1000.0
 
 
 def test_reward_first_lap_on_3_turn_race() -> None:
@@ -235,8 +236,8 @@ def test_reward_first_lap_on_3_turn_race() -> None:
     before = _make_kart_dto(position=(0, 0), speed=1, turns_done=0)
     after = _make_kart_dto(position=(0, 1), speed=1, turns_done=1)
     reward = compute_reward(before, after, circuit, nb_turns_total=3, crashed=False)
-    # tic = -0.5 + 0.5 (speed 1) + 0 = 0 ; +50 pour lap 1 sur course 3 tours
-    assert reward == pytest.approx(50.0)
+    # tic = -0.5 + 0.1 (speed 1 réduit) + 0 = -0.4 ; +50 pour lap 1
+    assert reward == pytest.approx(49.6)
 
 
 def test_reward_final_lap_on_1_turn_race() -> None:
@@ -244,8 +245,8 @@ def test_reward_final_lap_on_1_turn_race() -> None:
     before = _make_kart_dto(position=(0, 0), speed=1, turns_done=0)
     after = _make_kart_dto(position=(0, 1), speed=1, turns_done=1)
     reward = compute_reward(before, after, circuit, nb_turns_total=1, crashed=False)
-    # tic = 0 ; +200 pour le tour final (course 1 tour)
-    assert reward == pytest.approx(200.0)
+    # tic = -0.4 ; +200 pour le tour final
+    assert reward == pytest.approx(199.6)
 
 
 def test_reward_lap2_on_2_turn_race_is_final() -> None:
@@ -253,7 +254,7 @@ def test_reward_lap2_on_2_turn_race_is_final() -> None:
     before = _make_kart_dto(position=(0, 0), speed=0, turns_done=1)
     after = _make_kart_dto(position=(0, 1), speed=0, turns_done=2)
     reward = compute_reward(before, after, circuit, nb_turns_total=2, crashed=False)
-    # tic = -0.5 ; +200 (final lap)
+    # tic = -0.5 (speed 0) ; +200 (final lap)
     assert reward == pytest.approx(199.5)
 
 
@@ -263,8 +264,8 @@ def test_reward_reverse_finish_applies_penalty() -> None:
     before = _make_kart_dto(position=(0, 1), speed=1, turns_done=0)
     after = _make_kart_dto(position=(0, 0), speed=1, turns_done=-1)
     reward = compute_reward(before, after, circuit, nb_turns_total=3, crashed=False)
-    # tic = -0.5 + 0.5 (speed 1) + 0 = 0 ; malus = -30
-    assert reward == pytest.approx(-30.0)
+    # tic = -0.5 + 0.1 (speed 1) + 0 = -0.4 ; malus = -30
+    assert reward == pytest.approx(-30.4)
 
 
 def test_reward_double_reverse_doubles_penalty() -> None:

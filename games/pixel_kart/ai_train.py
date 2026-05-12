@@ -267,6 +267,13 @@ def run_episode(
     # Timeout sans victoire ni crash : pénaliser la stagnation pour que
     # l'IA n'apprenne pas à tourner en rond.
     if not finished and not crashed:
+        # DEBUG TEMPORAIRE : confirmer que le bloc timeout est bien atteint
+        # pendant l'entraînement. À retirer une fois la convergence vérifiée.
+        print(
+            f"[ai_train] timeout penalty applied "
+            f"(ticks={ticks}, total_reward_before={total_reward:.1f})",
+            flush=True,
+        )
         total_reward += TIMEOUT_PENALTY
         ai_kart.update_q(TIMEOUT_PENALTY, "", terminal=True)
 

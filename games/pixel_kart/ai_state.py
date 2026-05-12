@@ -132,8 +132,13 @@ def _tick_reward(kart_after: KartDTO, circuit: Circuit) -> float:
 
     Composantes :
     - Coût temps fixe : -0.5
-    - Bonus vitesse : +0.5 si speed=1, +1.5 si speed=2, sinon 0
+    - Bonus vitesse : +0.1 si speed=1, +0.2 si speed=2, sinon 0
     - Malus terrain : -2.0 sur herbe, 0 sur route/finish
+
+    Les bonus de vitesse sont volontairement faibles (auparavant +0.5/+1.5)
+    pour éviter que l'IA "finance" des crashs intentionnels en accumulant
+    du bonus avant d'aller percuter un mur. Le signal principal reste
+    le bonus de complétion de tour.
 
     Args:
         kart_after: État du kart après l'action.
@@ -146,9 +151,9 @@ def _tick_reward(kart_after: KartDTO, circuit: Circuit) -> float:
 
     speed = kart_after.speed
     if speed == 1:
-        speed_bonus = 0.5
+        speed_bonus = 0.1
     elif speed == 2:
-        speed_bonus = 1.5
+        speed_bonus = 0.2
     else:
         speed_bonus = 0.0
 
@@ -292,7 +297,11 @@ def compute_reward(
         Récompense flottante (peut être négative ou positive).
     """
     if crashed:
-        return -100.0
+        # -1000 (et non -100) pour garantir que crasher reste pire que
+        # le malus de timeout (-500). Avant ce changement, l'IA pouvait
+        # rationnellement préférer un crash à un timeout, ce qui menait
+        # à des taux de crash > 95 %.
+        return -1000.0
 
     reward = _tick_reward(kart_after, circuit)
 
