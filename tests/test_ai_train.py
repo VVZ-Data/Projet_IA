@@ -70,7 +70,7 @@ def test_timeout_penalty_applied_when_episode_times_out(
     )
 
     # Forcer l'IA à toujours jouer PASS → le kart ne bouge pas
-    monkeypatch.setattr(QLearningAI, "choose_action", lambda self, race: "PASS")
+    monkeypatch.setattr(QLearningAI, "choose_action", lambda self, state: "PASS")
 
     timeout = 10
     total_reward, ticks, finished, crashed = run_episode(
@@ -104,7 +104,7 @@ def test_no_timeout_penalty_on_crash(
     )
 
     # Forcer ACCELERATE → speed 1 EAST → bump into wall en 1 tic
-    monkeypatch.setattr(QLearningAI, "choose_action", lambda self, race: "ACCELERATE")
+    monkeypatch.setattr(QLearningAI, "choose_action", lambda self, state: "ACCELERATE")
 
     timeout = 50
     total_reward, ticks, finished, crashed = run_episode(

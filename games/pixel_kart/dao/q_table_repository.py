@@ -1,5 +1,5 @@
 """
-[IA-Claude] Repository RAM-first pour la Q-table de Pixel Kart.
+Repository RAM-first pour la Q-table de Pixel Kart.
 
 Refonte complète vs l'implémentation V1.
 
@@ -33,7 +33,7 @@ class QTableRepository:
         repo.flush(episode_logs=[...])       # commit à la base
 
     Les dépendances avec le module IA :
-        - `state` est une string de 5 caractères (cf. ai_state.encode_state)
+        - `state` est une string de 6 caractères (cf. ai_state.encode_state)
         - `action` est un caractère de ACTION_TO_CHAR.values()
     """
 
