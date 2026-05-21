@@ -360,7 +360,7 @@ def compute_reward(
         # comparé aux gains positifs rares que l'IA convergeait sur "ne
         # rien faire" (PASS). Avec -200 elle accepte de prendre des risques
         # raisonnables, et le timeout (-2000 côté ai_train) reste pire.
-        return -200.0
+        return -50.0
 
     reward = _tick_reward(kart_after, circuit)
     reward += _shaping_reward(kart_before, kart_after, circuit)
