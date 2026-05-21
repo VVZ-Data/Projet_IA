@@ -57,18 +57,6 @@ _LAP_BONUS: float = 400.0
 _REVERSE_FINISH_PENALTY: float = 30.0
 """Malus appliqué lors d'un franchissement de la ligne d'arrivée à contresens."""
 
-_SHAPING_SCALE: float = 1.0
-"""
-Échelle du potential-based reward shaping (Ng, Harada & Russell, 1999).
-
-shaping = (dist_avant - dist_après) * _SHAPING_SCALE
-
-Avancer vers la ligne d'arrivée (distance qui baisse) donne un bonus,
-reculer donne un malus. La politique optimale n'est pas modifiée par
-cet ajout (propriété mathématique du potential-based shaping).
-"""
-
-_MAX_DIST_FALLBACK: int = 10_000
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -108,16 +96,6 @@ def _lap_bonus(turns_done: int) -> float:
     return _LAP_BONUS if turns_done > 0 else 0.0
 
 
-def _shaping_reward(kart_before: KartDTO, kart_after: KartDTO, circuit: Circuit) -> float:
-    """Récompense de shaping basée sur la différence de distance à l'arrivée."""
-    distance_map = getattr(circuit, "distance_map", None)
-    if not distance_map:
-        return 0.0
-    dist_before = distance_map.get(kart_before.position, _MAX_DIST_FALLBACK)
-    dist_after = distance_map.get(kart_after.position, _MAX_DIST_FALLBACK)
-    return (dist_before - dist_after) * _SHAPING_SCALE
-
-
 # ──────────────────────────────────────────────────────────────────────────
 # API publique — utilitaires d'entraînement
 # ──────────────────────────────────────────────────────────────────────────
@@ -153,7 +131,6 @@ def compute_reward(
     En cas de crash (kart vivant avant, mort après), retourne -200 directement.
     Sinon, cumule :
     - la récompense par tic (coût temps + bonus vitesse + malus herbe)
-    - le reward shaping (distance à l'arrivée)
     - +400 si la ligne d'arrivée est franchie dans le bon sens
     - -30 si la ligne d'arrivée est franchie à contresens
     """
@@ -162,7 +139,6 @@ def compute_reward(
         return _CRASH_PENALTY
 
     reward = _tick_reward(kart_after, circuit)
-    reward += _shaping_reward(kart_before, kart_after, circuit)
 
     turns_diff = kart_after.turns_done - kart_before.turns_done
     if turns_diff > 0:

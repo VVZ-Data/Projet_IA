@@ -16,6 +16,8 @@ millions de mises à jour ne touchent la base que lors des flush groupés,
 ce qui rend le training ~50–100x plus rapide qu'une approche per-row.
 """
 
+import random
+
 from sqlalchemy import insert
 from sqlalchemy.orm import Session
 
@@ -128,7 +130,9 @@ class QTableRepository:
         Returns:
             Le caractère d'action ayant le Q maximum.
         """
-        return max(valid_actions, key=lambda a: self.get_q(state, a))
+        best_q = max(self.get_q(state, a) for a in valid_actions)
+        best_actions = [a for a in valid_actions if self.get_q(state, a) == best_q]
+        return random.choice(best_actions)
 
     # ──────────────────────────────────────────────────────────────────────
     # Persistance par batch
