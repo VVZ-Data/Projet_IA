@@ -1,5 +1,5 @@
 """
-[IA-Claude] Repository RAM-first pour la Q-table de Pixel Kart.
+Repository RAM-first pour la Q-table de Pixel Kart.
 
 Refonte complète vs l'implémentation V1.
 
@@ -15,6 +15,8 @@ Avantage : pendant l'entraînement, zéro fsync SQLite par update Q. Les
 millions de mises à jour ne touchent la base que lors des flush groupés,
 ce qui rend le training ~50–100x plus rapide qu'une approche per-row.
 """
+
+import random
 
 from sqlalchemy import insert
 from sqlalchemy.orm import Session
@@ -33,7 +35,7 @@ class QTableRepository:
         repo.flush(episode_logs=[...])       # commit à la base
 
     Les dépendances avec le module IA :
-        - `state` est une string de 5 caractères (cf. ai_state.encode_state)
+        - `state` est une string de 6 caractères (cf. ai_state.encode_state)
         - `action` est un caractère de ACTION_TO_CHAR.values()
     """
 
@@ -128,7 +130,9 @@ class QTableRepository:
         Returns:
             Le caractère d'action ayant le Q maximum.
         """
-        return max(valid_actions, key=lambda a: self.get_q(state, a))
+        best_q = max(self.get_q(state, a) for a in valid_actions)
+        best_actions = [a for a in valid_actions if self.get_q(state, a) == best_q]
+        return random.choice(best_actions)
 
     # ──────────────────────────────────────────────────────────────────────
     # Persistance par batch

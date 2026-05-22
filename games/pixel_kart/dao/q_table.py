@@ -1,5 +1,5 @@
 """
-[IA-Claude] Modèles SQLAlchemy pour la persistance de la Q-table de Pixel Kart.
+Modèles SQLAlchemy pour la persistance de la Q-table de Pixel Kart.
 
 Schéma à 3 tables (refonte complète vs l'ancien schéma 1 table de la V1) :
 
@@ -78,7 +78,7 @@ class QValue(Base):
     La clé primaire composite (run_id, state, action) permet d'avoir
     plusieurs runs partageant la même base sans interférence.
 
-    Le format string utilisé pour `state` (5 chars) et `action` (1 char)
+    Le format string utilisé pour `state` (6 chars) et `action` (1 char)
     est défini par `games/pixel_kart/ai_state.py`.
     """
 
@@ -89,7 +89,7 @@ class QValue(Base):
         ForeignKey("runs.id", ondelete="CASCADE"),
         primary_key=True,
     )
-    state = Column(String(5), primary_key=True)
+    state = Column(String(6), primary_key=True)
     action = Column(String(1), primary_key=True)
     value = Column(Float, default=0.0, nullable=False)
 

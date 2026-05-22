@@ -143,3 +143,61 @@ def test_race_not_finished_while_someone_can_play() -> None:
     race = Race(circuit=circuit, karts=[k1, k2], nb_turns=3)
     # Aucun n'a fini, tous vivants
     assert race.is_finished() is False
+
+
+# ──────────────────────────────────────────────────────────────────────────
+# Heat-map de distance (Circuit._compute_distance_map)
+# ──────────────────────────────────────────────────────────────────────────
+
+
+def test_distance_map_finish_cell_is_zero() -> None:
+    """Les cases F elles-mêmes ont une distance 0 (le but est atteint)."""
+    circuit = Circuit("t", "RRFRR")
+    assert circuit.distance_map[(0, 2)] == 0
+
+
+def test_distance_map_just_west_of_finish_is_one() -> None:
+    """La case immédiatement à l'ouest de F est la source du BFS = distance 1."""
+    circuit = Circuit("t", "RRFRR")
+    assert circuit.distance_map[(0, 1)] == 1
+    assert circuit.distance_map[(0, 0)] == 2
+
+
+def test_distance_map_just_east_of_finish_is_unreachable() -> None:
+    """
+    Sur un circuit en ligne droite (pas une boucle), les cases à l'est de F
+    ne sont pas accessibles via la voie correcte → absentes du map.
+    """
+    circuit = Circuit("t", "RRFRR")
+    # F est traité comme un mur pendant le BFS, donc (0,3) et (0,4) n'ont
+    # pas de chemin légal jusqu'à la source ouest.
+    assert (0, 3) not in circuit.distance_map
+    assert (0, 4) not in circuit.distance_map
+
+
+def test_distance_map_loop_circuit_east_side_has_high_distance() -> None:
+    """
+    Petite boucle : F en haut au milieu, route partout autour.
+    La case juste à l'est de F doit avoir une distance ÉLEVÉE
+    (il faut faire le tour complet pour la rejoindre par la voie correcte).
+    """
+    circuit = Circuit("t", "RFR,RRR,RRR")
+    dmap = circuit.distance_map
+    # Case juste ouest de F : la source du BFS = 1
+    assert dmap[(0, 0)] == 1
+    # Case juste est de F : doit faire le tour, donc distance > 1
+    assert (0, 2) in dmap
+    assert dmap[(0, 2)] > dmap[(0, 0)]
+
+
+def test_distance_map_excludes_walls() -> None:
+    """Les cases mur ne sont jamais dans le map."""
+    circuit = Circuit("t", "RFR,WRW,RRR")
+    assert (1, 0) not in circuit.distance_map
+    assert (1, 2) not in circuit.distance_map
+
+
+def test_distance_map_empty_when_no_finish() -> None:
+    """Sans ligne d'arrivée, pas de heat-map calculable."""
+    circuit = Circuit("t", "RRR")
+    assert circuit.distance_map == {}

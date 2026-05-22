@@ -96,7 +96,6 @@ class Circuit:
         ]
         # On suppose une ligne d'arrivée verticale (toutes les F sur la même colonne)
         self.finish_col = self.finish_positions[0][1] if self.finish_positions else 0
-
     def cell(self, row: int, col: int) -> str:
         """
         Retourne la lettre de la cellule demandée.

@@ -44,11 +44,11 @@ class PixelKartTrainingView(Frame):
     DEFAULTS: dict[str, str] = {
         "name": "default",
         "nb_turns": "1",
-        "nb_episodes": "10000",
-        "gamma": "0.9",
+        "nb_episodes": "50000",
+        "gamma": "0.99",
         "alpha": "0.1",
         "epsilon_start": "1.0",
-        "epsilon_end": "0.05",
+        "epsilon_end": "0.01",
     }
 
     def __init__(self, master, on_start_training=None, on_back=None) -> None:
