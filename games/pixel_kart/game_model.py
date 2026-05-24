@@ -8,8 +8,9 @@ Architecture MVC :
 """
 
 import random
+from collections import deque
 from dataclasses import dataclass, field
-from typing import List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional
 
 from games.pixel_kart.editor.const import PIXEL_TYPES
 
@@ -96,6 +97,50 @@ class Circuit:
         ]
         # On suppose une ligne d'arrivée verticale (toutes les F sur la même colonne)
         self.finish_col = self.finish_positions[0][1] if self.finish_positions else 0
+        self.distance_map: Dict[Tuple[int, int], int] = self._compute_distance_map()
+
+    def _compute_distance_map(self) -> Dict[Tuple[int, int], int]:
+        """
+        Calcule une heat-map BFS de distance à la ligne d'arrivée.
+
+        Source du BFS : les cases route immédiatement à l'OUEST de chaque F.
+        Les cases F et les murs sont des obstacles, ce qui force le chemin
+        à faire le tour complet. Les cases F reçoivent la distance 0.
+        """
+        distance_map: Dict[Tuple[int, int], int] = {}
+        if not self.finish_positions:
+            return distance_map
+
+        for pos in self.finish_positions:
+            distance_map[pos] = 0
+
+        queue: deque = deque()
+        for r, c in self.finish_positions:
+            west = (r, c - 1)
+            if not self.is_inside(*west):
+                continue
+            if self.grid[west[0]][west[1]] in (self.LETTER_WALL, self.LETTER_FINISH):
+                continue
+            if west not in distance_map:
+                distance_map[west] = 1
+                queue.append(west)
+
+        while queue:
+            r, c = queue.popleft()
+            d = distance_map[(r, c)]
+            for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+                nr, nc = r + dr, c + dc
+                if not self.is_inside(nr, nc):
+                    continue
+                if self.grid[nr][nc] in (self.LETTER_WALL, self.LETTER_FINISH):
+                    continue
+                if (nr, nc) in distance_map:
+                    continue
+                distance_map[(nr, nc)] = d + 1
+                queue.append((nr, nc))
+
+        return distance_map
+
     def cell(self, row: int, col: int) -> str:
         """
         Retourne la lettre de la cellule demandée.

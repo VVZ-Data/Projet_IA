@@ -57,6 +57,10 @@ _LAP_BONUS: float = 400.0
 _REVERSE_FINISH_PENALTY: float = 30.0
 """Malus appliqué lors d'un franchissement de la ligne d'arrivée à contresens."""
 
+_SHAPING_SCALE: float = 1.0
+"""Échelle du potential-based reward shaping (Ng, Harada & Russell, 1999)."""
+
+_MAX_DIST_FALLBACK: int = 10_000
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -75,12 +79,14 @@ def _tick_reward(kart_after: KartDTO, circuit: Circuit) -> float:
     base = -0.5
 
     speed = kart_after.speed
-    if speed == 1:
-        speed_bonus = 0.1
-    elif speed == 2:
+    if speed == 2:
+        speed_bonus = 0.4
+    elif speed == 1:
         speed_bonus = 0.2
-    else:
-        speed_bonus = 0.0
+    elif speed == 0:
+        speed_bonus = -0.1
+    else:  # speed == -1
+        speed_bonus = -0.2
 
     if circuit.is_inside(*kart_after.position):
         cell = circuit.cell(*kart_after.position)
@@ -94,6 +100,16 @@ def _tick_reward(kart_after: KartDTO, circuit: Circuit) -> float:
 def _lap_bonus(turns_done: int) -> float:
     """Retourne le bonus fixe pour un tour complété dans le bon sens (0 si pas de progrès)."""
     return _LAP_BONUS if turns_done > 0 else 0.0
+
+
+def _shaping_reward(kart_before: KartDTO, kart_after: KartDTO, circuit: Circuit) -> float:
+    """Récompense de shaping basée sur la différence de distance à l'arrivée."""
+    distance_map = getattr(circuit, "distance_map", None)
+    if not distance_map:
+        return 0.0
+    dist_before = distance_map.get(kart_before.position, _MAX_DIST_FALLBACK)
+    dist_after = distance_map.get(kart_after.position, _MAX_DIST_FALLBACK)
+    return (dist_before - dist_after) * _SHAPING_SCALE
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -139,6 +155,7 @@ def compute_reward(
         return _CRASH_PENALTY
 
     reward = _tick_reward(kart_after, circuit)
+    reward += _shaping_reward(kart_before, kart_after, circuit)
 
     turns_diff = kart_after.turns_done - kart_before.turns_done
     if turns_diff > 0:
