@@ -215,17 +215,17 @@ def test_reward_speed_2_on_road() -> None:
     before = _make_kart_dto(position=(0, 0), speed=1)
     after = _make_kart_dto(position=(0, 1), speed=2)
     reward = compute_reward(before, after, circuit)
-    # -0.5 (tic) + 0.2 (speed 2) + 0 (route) = -0.3
-    assert reward == pytest.approx(-0.3)
+    # -0.5 (tic) + 0.4 (speed 2) + 0 (route) = -0.1
+    assert reward == pytest.approx(-0.1)
 
 
-def test_reward_speed_0_on_grass_is_minus_2_5() -> None:
+def test_reward_speed_0_on_grass() -> None:
     circuit = _make_circuit(["GGG"])
     before = _make_kart_dto(position=(0, 1), speed=0)
     after = _make_kart_dto(position=(0, 1), speed=0)
     reward = compute_reward(before, after, circuit)
-    # -0.5 + 0 + (-2.0) = -2.5
-    assert reward == pytest.approx(-2.5)
+    # -0.5 + (-0.1) (speed 0) + (-2.0) (herbe) = -2.6
+    assert reward == pytest.approx(-2.6)
 
 
 def test_reward_crash_detected_from_dtos() -> None:
@@ -243,8 +243,8 @@ def test_reward_lap_bonus_is_400() -> None:
     before = _make_kart_dto(position=(0, 0), speed=1, turns_done=0)
     after = _make_kart_dto(position=(0, 1), speed=1, turns_done=1)
     reward = compute_reward(before, after, circuit)
-    # tic = -0.5 + 0.1 = -0.4 ; +400 pour le tour
-    assert reward == pytest.approx(399.6)
+    # tic = -0.5 + 0.2 (speed 1) = -0.3 ; +400 pour le tour
+    assert reward == pytest.approx(399.7)
 
 
 def test_reward_reverse_finish_applies_penalty() -> None:
@@ -253,8 +253,8 @@ def test_reward_reverse_finish_applies_penalty() -> None:
     before = _make_kart_dto(position=(0, 1), speed=1, turns_done=0)
     after = _make_kart_dto(position=(0, 0), speed=1, turns_done=-1)
     reward = compute_reward(before, after, circuit)
-    # tic = -0.5 + 0.1 = -0.4 ; malus = -30
-    assert reward == pytest.approx(-30.4)
+    # tic = -0.5 + 0.2 (speed 1) = -0.3 ; malus = -30
+    assert reward == pytest.approx(-30.3)
 
 
 def test_reward_reverse_finish_is_flat_penalty() -> None:
@@ -263,8 +263,8 @@ def test_reward_reverse_finish_is_flat_penalty() -> None:
     before = _make_kart_dto(position=(0, 1), speed=0, turns_done=2)
     after = _make_kart_dto(position=(0, 0), speed=0, turns_done=0)
     reward = compute_reward(before, after, circuit)
-    # tic = -0.5 ; malus = -30 (plat, pas proportionnel à turns_diff)
-    assert reward == pytest.approx(-30.5)
+    # tic = -0.5 + (-0.1) (speed 0) = -0.6 ; malus = -30
+    assert reward == pytest.approx(-30.6)
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -324,8 +324,8 @@ def test_shaping_positive_when_progressing_toward_finish() -> None:
     before = _make_kart_dto(position=(0, 0), speed=1)
     after = _make_kart_dto(position=(0, 1), speed=1)
     reward = compute_reward(before, after, circuit)
-    # tic = -0.4 ; shaping = +1 ; total = +0.6
-    assert reward == pytest.approx(0.6)
+    # tic = -0.5 + 0.2 (speed 1) = -0.3 ; shaping = +1 ; total = +0.7
+    assert reward == pytest.approx(0.7)
 
 
 def test_shaping_negative_when_going_backwards() -> None:
@@ -333,8 +333,8 @@ def test_shaping_negative_when_going_backwards() -> None:
     before = _make_kart_dto(position=(0, 1), speed=1)
     after = _make_kart_dto(position=(0, 0), speed=1)
     reward = compute_reward(before, after, circuit)
-    # tic = -0.4 ; shaping = -1 ; total = -1.4
-    assert reward == pytest.approx(-1.4)
+    # tic = -0.3 ; shaping = -1 ; total = -1.3
+    assert reward == pytest.approx(-1.3)
 
 
 def test_shaping_zero_when_circuit_has_no_finish() -> None:
@@ -342,8 +342,8 @@ def test_shaping_zero_when_circuit_has_no_finish() -> None:
     before = _make_kart_dto(position=(0, 0), speed=1)
     after = _make_kart_dto(position=(0, 1), speed=1)
     reward = compute_reward(before, after, circuit)
-    # tic = -0.4 ; pas de shaping
-    assert reward == pytest.approx(-0.4)
+    # tic = -0.3 ; pas de shaping
+    assert reward == pytest.approx(-0.3)
 
 
 def test_shaping_not_applied_on_crash() -> None:

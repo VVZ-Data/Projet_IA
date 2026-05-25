@@ -80,8 +80,8 @@ def test_timeout_penalty_applied_when_episode_times_out(
     assert not finished, "PASS pur ne doit jamais terminer la course"
     assert not crashed, "PASS pur ne fait pas crasher"
     assert ticks == timeout, "L'épisode doit aller jusqu'au timeout"
-    # tic_reward sur route avec speed=0 = -0.5 ; cumul + malus stagnation
-    expected = -0.5 * timeout + TIMEOUT_PENALTY
+    # tic_reward sur route avec speed=0 = -0.5 + (-0.1) = -0.6 ; cumul + malus stagnation
+    expected = -0.6 * timeout + TIMEOUT_PENALTY
     assert total_reward == pytest.approx(expected)
 
 
